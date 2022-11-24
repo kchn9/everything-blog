@@ -7,7 +7,7 @@ postsRouter.get("/", (req, res) => {
   });
 });
 
-postsRouter.get("/:id", (req, res) => {
+postsRouter.get("/:id", (req, res, next) => {
   const postId = req.params.id;
   Post.findById(postId)
     .then((post) => {
@@ -17,17 +17,15 @@ postsRouter.get("/:id", (req, res) => {
       return res.status(200).json(post);
     })
     .catch((e) => {
-      res.status(400).json({
-        message: e.message,
-      });
+      next(e);
     });
 });
 
-postsRouter.post("/", (req, res) => {
-  const { title, body } = req.body;
+postsRouter.post("/", (req, res, next) => {
+  const body = req.body;
   const newPost = new Post({
-    title,
-    body,
+    title: body.title,
+    body: body.body,
   });
   newPost
     .save()
@@ -37,13 +35,11 @@ postsRouter.post("/", (req, res) => {
       });
     })
     .catch((e) => {
-      res.status(400).json({
-        message: e.message,
-      });
+      next(e);
     });
 });
 
-postsRouter.put("/:id", (req, res) => {
+postsRouter.put("/:id", (req, res, next) => {
   const postId = req.params.id;
   Post.findByIdAndUpdate(postId, req.body, { new: true })
     .then((updatedPost) => {
@@ -53,13 +49,11 @@ postsRouter.put("/:id", (req, res) => {
       return res.status(200).json(updatedPost);
     })
     .catch((e) => {
-      res.status(400).json({
-        message: e.message,
-      });
+      next(e);
     });
 });
 
-postsRouter.delete("/:id", (req, res) => {
+postsRouter.delete("/:id", (req, res, next) => {
   const postId = req.params.id;
   Post.findByIdAndDelete(postId)
     .then((deletedPost) => {
@@ -69,9 +63,7 @@ postsRouter.delete("/:id", (req, res) => {
       return res.status(200).json(deletedPost);
     })
     .catch((e) => {
-      res.status(400).json({
-        message: e.message,
-      });
+      next(e);
     });
 });
 

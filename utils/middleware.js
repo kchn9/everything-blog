@@ -1,4 +1,5 @@
 const morgan = require("morgan");
+const logger = require("./logger");
 
 const requestLogger = morgan(function (tokens, req, res) {
   return [
@@ -14,6 +15,23 @@ const requestLogger = morgan(function (tokens, req, res) {
   ].join(" ");
 });
 
+function errorHandler(error, req, res, next) {
+  logger.error(error.message);
+
+  if (error.name === "ValidationError" || error.name === "CastError") {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+  next(error);
+}
+
+const unknownEndpointHandler = (req, res) => {
+  return res.sendStatus(404);
+};
+
 module.exports = {
   requestLogger,
+  errorHandler,
+  unknownEndpointHandler,
 };
