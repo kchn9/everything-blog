@@ -16,7 +16,7 @@ const requestLogger = morgan(function (tokens, req, res) {
 });
 
 function errorHandler(error, req, res, next) {
-  logger.error(error.message);
+  logger.error(error);
 
   if (error.name === "ValidationError" || error.name === "CastError") {
     return res.status(400).json({
