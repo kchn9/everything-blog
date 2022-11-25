@@ -4,12 +4,27 @@
   line-height: 24px;
   font-weight: 400;
 
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #242424;
+  background-color: whitesmoke;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.logo {
+  float: left;
+  margin: 0 24px 0 0;
+  color: whitesmoke;
+  font-weight: bold;
+}
+
+.dropdown-overlay {
+  inset: 64px 0 0 0 !important;
 }
