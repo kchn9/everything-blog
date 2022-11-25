@@ -12,6 +12,7 @@ postsRouter.get("/search", (req, res, next) => {
   const { query } = req;
 
   if (query.hasOwnProperty("contains")) {
+    // find posts containing query
     Post.find()
       .or([
         { title: { $regex: query.contains } },
@@ -22,6 +23,22 @@ postsRouter.get("/search", (req, res, next) => {
           return res.sendStatus(404);
         }
         return res.status(200).json(posts);
+      })
+      .catch((e) => next(e));
+  } else if (query.hasOwnProperty("category")) {
+    // filter by category
+    const categoryName = query.category;
+    console.log(categoryName);
+    Category.findOne({ name: categoryName })
+      .then((category) => {
+        if (!category) {
+          return res.sendStatus(404);
+        }
+        Post.find({ categories: { $in: category._id } })
+          .then((posts) => {
+            return res.status(200).json(posts);
+          })
+          .catch((e) => next(e));
       })
       .catch((e) => next(e));
   } else {
