@@ -7,6 +7,27 @@ postsRouter.get("/", (req, res) => {
   });
 });
 
+postsRouter.get("/search", (req, res, next) => {
+  const { query } = req;
+
+  if (query.hasOwnProperty("contains")) {
+    Post.find()
+      .or([
+        { title: { $regex: query.contains } },
+        { body: { $regex: query.contains } },
+      ])
+      .then((posts) => {
+        if (!posts) {
+          return res.sendStatus(404);
+        }
+        return res.status(200).json(posts);
+      })
+      .catch((e) => next(e));
+  } else {
+    return res.sendStatus(400);
+  }
+});
+
 postsRouter.get("/:id", (req, res, next) => {
   const postId = req.params.id;
   Post.findById(postId)
@@ -16,9 +37,7 @@ postsRouter.get("/:id", (req, res, next) => {
       }
       return res.status(200).json(post);
     })
-    .catch((e) => {
-      next(e);
-    });
+    .catch((e) => next(e));
 });
 
 postsRouter.post("/", (req, res, next) => {
@@ -34,9 +53,7 @@ postsRouter.post("/", (req, res, next) => {
         post,
       });
     })
-    .catch((e) => {
-      next(e);
-    });
+    .catch((e) => next(e));
 });
 
 postsRouter.put("/:id", (req, res, next) => {
@@ -48,9 +65,7 @@ postsRouter.put("/:id", (req, res, next) => {
       }
       return res.status(200).json(updatedPost);
     })
-    .catch((e) => {
-      next(e);
-    });
+    .catch((e) => next(e));
 });
 
 postsRouter.delete("/:id", (req, res, next) => {
@@ -62,9 +77,7 @@ postsRouter.delete("/:id", (req, res, next) => {
       }
       return res.status(200).json(deletedPost);
     })
-    .catch((e) => {
-      next(e);
-    });
+    .catch((e) => next(e));
 });
 
 module.exports = postsRouter;
