@@ -1,5 +1,6 @@
 const postsRouter = require("express").Router();
 const Post = require("../models/post");
+const Category = require("../models/category");
 
 postsRouter.get("/", (req, res) => {
   Post.find({}).then((posts) => {
@@ -45,10 +46,23 @@ postsRouter.post("/", (req, res, next) => {
   const newPost = new Post({
     title: body.title,
     body: body.body,
+    categories: body.categories,
   });
+
   newPost
     .save()
     .then((post) => {
+      if (body.categories) {
+        for (const categoryId of body.categories) {
+          Category.findByIdAndUpdate(
+            categoryId,
+            {
+              $addToSet: { posts: post._id },
+            },
+            { new: true }
+          ).catch((e) => next(e));
+        }
+      }
       res.status(201).json({
         post,
       });
@@ -58,11 +72,30 @@ postsRouter.post("/", (req, res, next) => {
 
 postsRouter.put("/:id", (req, res, next) => {
   const postId = req.params.id;
-  Post.findByIdAndUpdate(postId, req.body, { new: true })
+  const body = req.body;
+  const updateQuery = {
+    title: body.title,
+    body: body.body,
+    categories: body.categories,
+  };
+  Post.findByIdAndUpdate(postId, updateQuery, { new: true })
     .then((updatedPost) => {
       if (!updatedPost) {
         return res.sendStatus(404);
       }
+
+      if (updateQuery.categories) {
+        for (const categoryId of updateQuery.categories) {
+          Category.findByIdAndUpdate(
+            categoryId,
+            {
+              $addToSet: { posts: updatedPost._id },
+            },
+            { new: true }
+          ).catch((e) => next(e));
+        }
+      }
+
       return res.status(200).json(updatedPost);
     })
     .catch((e) => next(e));

@@ -6,12 +6,13 @@ const {
   db: { user, password, name },
 } = require("config");
 const dbUri = `mongodb+srv://${user}:${password}@cluster0.qlxz8um.mongodb.net/${name}?retryWrites=true&w=majority`;
-const postsRouter = require("./controllers/posts");
 const {
   requestLogger,
   errorHandler,
   unknownEndpointHandler,
 } = require("./utils/middleware");
+const postsRouter = require("./controllers/posts");
+const categoriesRouter = require("./controllers/categories");
 
 mongoose
   .connect(dbUri)
@@ -26,6 +27,7 @@ mongoose
 app.use(requestLogger);
 app.use(express.json());
 
+app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/posts", postsRouter);
 
 app.use(unknownEndpointHandler);
