@@ -5,7 +5,7 @@ import { useMemo, useEffect, useState } from "react";
 import { useWindowSize } from "./hooks/useWindowSize";
 const { Header: AntHeader } = Layout;
 
-export const Header = () => {
+export const Header = ({ setActiveCategory }) => {
   const [categories, setCategories] = useState(null);
   const fetchCategories = async () => {
     categoriesAPI.getAllCategories().then((res) => {
@@ -17,12 +17,31 @@ export const Header = () => {
   }, []);
   const navItems = useMemo(() => {
     if (categories) {
-      return categories.map((category) => ({
-        label: category.name,
-        key: category._id,
-      }));
+      return [
+        {
+          label: "All",
+          key: "0",
+        },
+        ...categories.map((category) => ({
+          label: category.name,
+          key: category._id,
+        })),
+      ];
     }
   }, [categories]);
+
+  const [selectedKeys, setSelectedKeys] = useState("0");
+  function handleActiveCategoryChange(key) {
+    setSelectedKeys(key);
+    if (key === "0") {
+      setActiveCategory("All");
+    } else {
+      const { name: categoryToSet } = categories.find(
+        (category) => category._id === key
+      );
+      setActiveCategory(categoryToSet);
+    }
+  }
 
   const [width, _] = useWindowSize();
 
@@ -39,7 +58,9 @@ export const Header = () => {
           theme="dark"
           mode="horizontal"
           defaultSelectedKeys={[categories[0]._id]}
+          selectedKeys={[selectedKeys]}
           items={navItems}
+          onClick={({ key }) => handleActiveCategoryChange(key)}
         />
       ) : (
         <Dropdown
@@ -51,6 +72,10 @@ export const Header = () => {
               borderRadius: "0",
               boxShadow: "none",
               padding: "5px 38px",
+            },
+            selectedKeys: [selectedKeys],
+            onClick: function ({ key }) {
+              handleActiveCategoryChange(key);
             },
           }}
           placement="bottom"

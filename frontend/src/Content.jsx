@@ -1,7 +1,8 @@
 import postsAPI from "./services/postsAPI";
 import { useState, useEffect } from "react";
+import { Breadcrumb } from "./Breadcrumb";
 import { Card } from "./Card";
-import { Layout, Row, Col, Spin, Space, Empty } from "antd";
+import { Layout, Row, Col, Spin, Empty } from "antd";
 const { Content: AntContent } = Layout;
 
 const PostsGrid = ({ posts }) => {
@@ -9,7 +10,7 @@ const PostsGrid = ({ posts }) => {
     <Row gutter={[12, 16]}>
       {posts &&
         posts.map((post) => (
-          <Col xxl={4} xl={6} lg={8} sm={12} xs={24}>
+          <Col key={post._id} xxl={4} xl={6} lg={8} sm={12} xs={24}>
             <Card post={post} />
           </Col>
         ))}
@@ -17,7 +18,7 @@ const PostsGrid = ({ posts }) => {
   );
 };
 
-export const Content = () => {
+export const Content = ({ activeCategory }) => {
   const [posts, setPosts] = useState(null);
   const fetchPosts = async () => {
     postsAPI.getAllPosts().then((res) => {
@@ -29,7 +30,8 @@ export const Content = () => {
   }, []);
 
   return (
-    <AntContent style={{ padding: 50 }}>
+    <AntContent style={{ padding: "24px 50px" }}>
+      <Breadcrumb activeCategory={activeCategory} />
       {posts ? (
         posts.length != 0 ? (
           <PostsGrid posts={posts} />
