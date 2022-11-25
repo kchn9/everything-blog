@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const cors = require("cors");
 const logger = require("./utils/logger");
 const {
   db: { user, password, name },
@@ -25,6 +26,7 @@ mongoose
   });
 
 app.use(requestLogger);
+app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1/categories", categoriesRouter);
