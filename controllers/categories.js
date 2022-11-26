@@ -14,6 +14,7 @@ categoriesRouter.get("/:id", (req, res, next) => {
   const categoryId = req.params.id;
 
   Category.findById(categoryId)
+    .populate("posts")
     .then((category) => {
       if (!category) {
         return res.sendStatus(404);
