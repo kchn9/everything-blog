@@ -1,4 +1,5 @@
 import postsAPI from "./services/postsAPI";
+import categoriesAPI from "./services/categoriesAPI";
 import { useState, useEffect } from "react";
 import { Breadcrumb } from "./Breadcrumb";
 import { Card } from "./Card";
@@ -21,13 +22,20 @@ const PostsGrid = ({ posts }) => {
 export const Content = ({ activeCategory }) => {
   const [posts, setPosts] = useState(null);
   const fetchPosts = async () => {
-    postsAPI.getAllPosts().then((res) => {
-      setPosts(res);
-    });
+    if (activeCategory.name === "All") {
+      return postsAPI.getAllPosts().then((res) => {
+        setPosts(res);
+      });
+    }
+    return categoriesAPI
+      .getPostsByCategoryId(activeCategory._id)
+      .then((res) => {
+        setPosts(res);
+      });
   };
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [activeCategory]);
 
   return (
     <AntContent style={{ padding: "24px 50px" }}>
