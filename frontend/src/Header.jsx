@@ -5,7 +5,7 @@ import { useMemo, useEffect, useState } from "react";
 import { useWindowSize } from "./hooks/useWindowSize";
 const { Header: AntHeader } = Layout;
 
-export const Header = ({ setActiveCategory }) => {
+export const Header = ({ activeCategory, setActiveCategory }) => {
   const [categories, setCategories] = useState(null);
   const fetchCategories = async () => {
     categoriesAPI.getAllCategories().then((res) => {
@@ -30,15 +30,14 @@ export const Header = ({ setActiveCategory }) => {
     }
   }, [categories]);
 
-  const [selectedKeys, setSelectedKeys] = useState("0");
   function handleActiveCategoryChange(key) {
-    setSelectedKeys(key);
     if (key === "0") {
-      setActiveCategory("All");
+      setActiveCategory({
+        _id: key,
+        name: "All",
+      });
     } else {
-      const { name: categoryToSet } = categories.find(
-        (category) => category._id === key
-      );
+      const categoryToSet = categories.find((category) => category._id === key);
       setActiveCategory(categoryToSet);
     }
   }
@@ -58,7 +57,7 @@ export const Header = ({ setActiveCategory }) => {
           theme="dark"
           mode="horizontal"
           defaultSelectedKeys={[categories[0]._id]}
-          selectedKeys={[selectedKeys]}
+          selectedKeys={[activeCategory._id]}
           items={navItems}
           onClick={({ key }) => handleActiveCategoryChange(key)}
         />
@@ -73,7 +72,7 @@ export const Header = ({ setActiveCategory }) => {
               boxShadow: "none",
               padding: "5px 38px",
             },
-            selectedKeys: [selectedKeys],
+            selectedKeys: [activeCategory._id],
             onClick: function ({ key }) {
               handleActiveCategoryChange(key);
             },

@@ -12,7 +12,7 @@ const Breadcrumb = ({ activeCategory }) => {
       <Item href="/">
         <HomeOutlined />
       </Item>
-      <Item href="/">{activeCategory}</Item>
+      <Item href="/">{activeCategory.name}</Item>
     </AntBreadcrumb>
   );
 };
