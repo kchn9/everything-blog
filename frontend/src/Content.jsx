@@ -2,7 +2,7 @@ import postsAPI from "./services/postsAPI";
 import { useState, useEffect } from "react";
 import { Breadcrumb } from "./Breadcrumb";
 import { Card } from "./Card";
-import { Layout, Row, Col, Spin, Empty } from "antd";
+import { Layout, Row, Col, Spin, Empty, Typography } from "antd";
 const { Content: AntContent } = Layout;
 
 const PostsGrid = ({ posts }) => {
@@ -39,14 +39,17 @@ export const Content = ({ activeCategory }) => {
           <Empty style={{ margin: "64px 0" }} description="No posts" />
         )
       ) : (
-        <Spin
-          size="large"
-          style={{
-            margin: "64px 0",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        />
+        <>
+          <Spin
+            size="large"
+            style={{
+              margin: "64px 0 24px 0",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          />
+          <Typography style={{ textAlign: "center" }}>Loading...</Typography>
+        </>
       )}
     </AntContent>
   );
