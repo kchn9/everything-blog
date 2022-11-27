@@ -35,7 +35,7 @@ const renderCustomTag = ({ label, closable, onClose }) => {
   );
 };
 
-const AddNewPost = ({ categories }) => {
+const AddNewPost = ({ categories, setAlert, setCreatingPostMode }) => {
   const [form] = Form.useForm();
   const title = Form.useWatch("title", form);
   const body = Form.useWatch("body", form);
@@ -45,6 +45,23 @@ const AddNewPost = ({ categories }) => {
     e.preventDefault();
     console.log(title, body, selectedCategories);
     postsAPI.postPost(title, body, selectedCategories);
+  }
+
+  function handleSuccessfullFinish() {
+    setCreatingPostMode(false);
+    setAlert({
+      title: "Success",
+      body: "Your post has been added successfully.",
+      type: "success",
+    });
+  }
+
+  function handleFailedFinish() {
+    setAlert({
+      title: "Error",
+      body: "Ooops.. something went wrong, please check error fields and try again.",
+      type: "error",
+    });
   }
 
   const categoriesOptions = useMemo(() => {
@@ -72,6 +89,8 @@ const AddNewPost = ({ categories }) => {
         </Typography.Title>
         <Form
           onSubmitCapture={handleSubmit}
+          onFinish={handleSuccessfullFinish}
+          onFinishFailed={handleFailedFinish}
           form={form}
           name="post"
           labelCol={{ span: 6 }}

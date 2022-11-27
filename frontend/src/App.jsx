@@ -39,6 +39,7 @@ const App = () => {
         categories={categories}
         activeCategory={activeCategory}
         creatingPostMode={creatingPostMode}
+        setCreatingPostMode={setCreatingPostMode}
         setAlert={setAlert}
       />
       <Alert title={alert.title} errorBody={alert.body} type={alert.type} />

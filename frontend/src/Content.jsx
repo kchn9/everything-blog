@@ -24,6 +24,7 @@ export const Content = ({
   categories,
   activeCategory,
   creatingPostMode,
+  setCreatingPostMode,
   setAlert,
 }) => {
   const [posts, setPosts] = useState(null);
@@ -46,7 +47,11 @@ export const Content = ({
   return (
     <AntContent style={{ padding: "24px 50px" }}>
       {creatingPostMode ? (
-        <AddNewPost categories={categories} />
+        <AddNewPost
+          categories={categories}
+          setAlert={setAlert}
+          setCreatingPostMode={setCreatingPostMode}
+        />
       ) : posts ? (
         posts.length != 0 ? (
           <>
