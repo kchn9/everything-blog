@@ -3,6 +3,7 @@ import categoriesAPI from "./services/categoriesAPI";
 import { useState, useEffect } from "react";
 import { Breadcrumb } from "./Breadcrumb";
 import { Card } from "./Card";
+import { AddNewPost } from "./AddNewPost";
 import { Layout, Row, Col, Spin, Empty, Typography } from "antd";
 const { Content: AntContent } = Layout;
 
@@ -19,7 +20,7 @@ const PostsGrid = ({ posts }) => {
   );
 };
 
-export const Content = ({ activeCategory }) => {
+export const Content = ({ categories, activeCategory, creatingPostMode }) => {
   const [posts, setPosts] = useState(null);
   const fetchPosts = async () => {
     if (activeCategory.name === "All") {
@@ -39,10 +40,14 @@ export const Content = ({ activeCategory }) => {
 
   return (
     <AntContent style={{ padding: "24px 50px" }}>
-      <Breadcrumb activeCategory={activeCategory} />
-      {posts ? (
+      {creatingPostMode ? (
+        <AddNewPost categories={categories} />
+      ) : posts ? (
         posts.length != 0 ? (
-          <PostsGrid posts={posts} />
+          <>
+            <Breadcrumb activeCategory={activeCategory} />
+            <PostsGrid posts={posts} />
+          </>
         ) : (
           <Empty style={{ margin: "64px 0" }} description="No posts" />
         )
