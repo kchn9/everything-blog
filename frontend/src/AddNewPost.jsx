@@ -1,4 +1,5 @@
 import postsAPI from "./services/postsAPI";
+import coverAPI from "./services/coversAPI";
 import {
   Typography,
   Form,
@@ -10,7 +11,7 @@ import {
   Button,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 const { Item } = Form;
 
 const renderCustomTag = ({ label, closable, onClose }) => {
@@ -44,13 +45,18 @@ const AddNewPost = ({
   const [form] = Form.useForm();
   const title = Form.useWatch("title", form);
   const body = Form.useWatch("body", form);
+  const [coverId, setCoverId] = useState("");
   const selectedCategories = Form.useWatch("categories", form);
 
   function handleSubmit(e) {
     e.preventDefault();
-    postsAPI.postPost(title, body, selectedCategories).then(({ post }) => {
-      setPosts((prev) => [...prev, post]);
-    });
+    console.log(title, body, selectedCategories, coverId);
+    postsAPI
+      .postPost(title, body, selectedCategories, coverId)
+      .then(({ post }) => {
+        setPosts((prev) => [...prev, post]);
+      })
+      .catch((e) => console.log(e));
   }
 
   function handleSuccessfullFinish() {
@@ -118,11 +124,24 @@ const AddNewPost = ({
             <Input placeholder="Please input post title" />
           </Item>
           <Item label="Cover">
-            {/* TODO */}
-            <Upload>
+            <Upload
+              listType="picture-card"
+              accept="image/jpeg, image/png"
+              maxCount={1}
+              customRequest={({ file, onSuccess, onError }) => {
+                coverAPI
+                  .postCover(file)
+                  .then((response) => {
+                    setCoverId(response._id);
+                    onSuccess(file);
+                  })
+                  .catch((e) => {
+                    onError(e);
+                  });
+              }}
+            >
               <Button icon={<UploadOutlined />}>Upload</Button>
             </Upload>
-            {/* TODO */}
           </Item>
           <Item label="Categories" name="categories">
             <Select

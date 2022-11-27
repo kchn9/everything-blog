@@ -1,11 +1,10 @@
 const multer = require("multer");
-const postsRouter = require("express").Router();
 const Post = require("../models/post");
+const Cover = require("../models/cover");
 const Category = require("../models/category");
-
-// https://medium.com/geekculture/how-to-store-images-on-mongodb-71081a1da96f
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const postsRouter = require("express").Router();
 
 postsRouter.get("/", (req, res) => {
   Post.find({}).then((posts) => {
@@ -63,25 +62,46 @@ postsRouter.get("/:id", (req, res, next) => {
     .catch((e) => next(e));
 });
 
-postsRouter.post("/", upload.single("file"), (req, res, next) => {
+postsRouter.post("/covers", upload.single("file"), (req, res, next) => {
+  if (req.file) {
+    const newCover = new Cover({
+      file: {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      },
+      fileName: `${Date.now()}-${req.file.originalname}`,
+    });
+    newCover
+      .save()
+      .then((savedCover) => {
+        res.status(201).json(savedCover);
+      })
+      .catch((e) => next(e));
+  } else {
+    res.sendStatus(400);
+  }
+});
+
+postsRouter.post("/", (req, res, next) => {
   const body = req.body;
 
   const newPost = new Post({
     title: body.title,
     body: body.body,
     categories: body.categories,
+    coverId: body.coverId,
   });
-
-  if (req.file) {
-    newPost.cover = {
-      data: req.file.buffer,
-      contentType: req.file.mimetype,
-    };
-  }
 
   newPost
     .save()
     .then((post) => {
+      if (body.coverId) {
+        Cover.findByIdAndUpdate(
+          body.coverId,
+          { $set: { postId: post._id } },
+          { new: true }
+        ).catch((e) => next(e));
+      }
       if (body.categories) {
         for (const categoryId of body.categories) {
           Category.findByIdAndUpdate(
