@@ -10,6 +10,10 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    cover: {
+      type: Buffer,
+      contentType: String,
+    },
     categories: [
       {
         type: mongoose.Schema.Types.ObjectId,

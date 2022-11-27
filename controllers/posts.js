@@ -1,6 +1,11 @@
+const multer = require("multer");
 const postsRouter = require("express").Router();
 const Post = require("../models/post");
 const Category = require("../models/category");
+
+// https://medium.com/geekculture/how-to-store-images-on-mongodb-71081a1da96f
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 postsRouter.get("/", (req, res) => {
   Post.find({}).then((posts) => {
@@ -58,13 +63,21 @@ postsRouter.get("/:id", (req, res, next) => {
     .catch((e) => next(e));
 });
 
-postsRouter.post("/", (req, res, next) => {
+postsRouter.post("/", upload.single("file"), (req, res, next) => {
   const body = req.body;
+
   const newPost = new Post({
     title: body.title,
     body: body.body,
     categories: body.categories,
   });
+
+  if (req.file) {
+    newPost.cover = {
+      data: req.file.buffer,
+      contentType: req.file.mimetype,
+    };
+  }
 
   newPost
     .save()
