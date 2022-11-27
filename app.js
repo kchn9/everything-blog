@@ -25,9 +25,9 @@ mongoose
     logger.error(e);
   });
 
-app.use(requestLogger);
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/posts", postsRouter);
