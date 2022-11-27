@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Layout } from "antd";
 import { Header } from "./Header";
 import { Content } from "./Content";
+import { Alert } from "./Alert";
 
 const App = () => {
   const [activeCategory, setActiveCategory] = useState({
@@ -19,6 +20,11 @@ const App = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
+  const [alert, setAlert] = useState({
+    title: "",
+    body: "",
+    type: "",
+  });
 
   return (
     <Layout>
@@ -33,7 +39,9 @@ const App = () => {
         categories={categories}
         activeCategory={activeCategory}
         creatingPostMode={creatingPostMode}
+        setAlert={setAlert}
       />
+      <Alert title={alert.title} errorBody={alert.body} type={alert.type} />
     </Layout>
   );
 };

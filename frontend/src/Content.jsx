@@ -20,7 +20,12 @@ const PostsGrid = ({ posts }) => {
   );
 };
 
-export const Content = ({ categories, activeCategory, creatingPostMode }) => {
+export const Content = ({
+  categories,
+  activeCategory,
+  creatingPostMode,
+  setAlert,
+}) => {
   const [posts, setPosts] = useState(null);
   const fetchPosts = async () => {
     if (activeCategory.name === "All") {
