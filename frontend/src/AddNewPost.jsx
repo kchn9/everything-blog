@@ -82,6 +82,7 @@ const AddNewPost = ({
       <div
         style={{
           padding: "50px",
+          marginTop: "25px",
           boxShadow:
             "0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%)",
           borderRadius: "6px",

@@ -29,7 +29,7 @@ export const Content = ({
   setCreatingPostMode,
   setAlert,
 }) => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(null);
   const fetchPosts = async () => {
     if (activeCategory.name === "All") {
       return postsAPI.getAllPosts().then((res) => {
