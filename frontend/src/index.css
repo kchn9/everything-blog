@@ -19,10 +19,14 @@ body {
 }
 
 .logo {
-  float: left;
-  margin: 0 24px 0 0;
   color: whitesmoke;
   font-weight: bold;
+}
+
+@media only screen and (max-width: 425px) {
+  .logo {
+    display: none;
+  }
 }
 
 .dropdown-overlay {
