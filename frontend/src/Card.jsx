@@ -1,3 +1,4 @@
+import postsAPI from "./services/postsAPI";
 import { truncate } from "./util/truncate";
 import {
   ExpandOutlined,
@@ -7,13 +8,21 @@ import {
 import { Card as AntCard, Typography } from "antd";
 const { Meta } = AntCard;
 
-const actions = [
-  <ExpandOutlined key="show" />,
-  <EditOutlined key="edit" />,
-  <DeleteOutlined key="edit" />,
-];
-
-const Card = ({ post }) => {
+const Card = ({ post, setPosts }) => {
+  function handlePostDelete() {
+    postsAPI.deletePostById(post._id).then(() => {
+      setPosts((prev) => [...prev].filter((p) => p._id !== post._id));
+    });
+  }
+  const actions = [
+    <ExpandOutlined key="show" />,
+    <EditOutlined key="edit" />,
+    <DeleteOutlined
+      key="edit"
+      className="delete-icon"
+      onClick={() => handlePostDelete()}
+    />,
+  ];
   return (
     <AntCard
       title={post.title}

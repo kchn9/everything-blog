@@ -87,7 +87,7 @@ export const Header = ({
             creatingPostMode={creatingPostMode}
             setCreatingPostMode={setCreatingPostMode}
           />
-          <div className="logo" style={{ marginRight: 40 }}>
+          <div className="logo" style={{ marginRight: 46 }}>
             EverythingBlog
           </div>
           <Dropdown

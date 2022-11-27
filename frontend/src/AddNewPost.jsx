@@ -35,7 +35,12 @@ const renderCustomTag = ({ label, closable, onClose }) => {
   );
 };
 
-const AddNewPost = ({ categories, setAlert, setCreatingPostMode }) => {
+const AddNewPost = ({
+  categories,
+  setAlert,
+  setCreatingPostMode,
+  setPosts,
+}) => {
   const [form] = Form.useForm();
   const title = Form.useWatch("title", form);
   const body = Form.useWatch("body", form);
@@ -43,8 +48,9 @@ const AddNewPost = ({ categories, setAlert, setCreatingPostMode }) => {
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(title, body, selectedCategories);
-    postsAPI.postPost(title, body, selectedCategories);
+    postsAPI.postPost(title, body, selectedCategories).then(({ post }) => {
+      setPosts((prev) => [...prev, post]);
+    });
   }
 
   function handleSuccessfullFinish() {

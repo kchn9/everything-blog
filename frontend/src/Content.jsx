@@ -7,17 +7,19 @@ import { AddNewPost } from "./AddNewPost";
 import { Layout, Row, Col, Spin, Empty, Typography } from "antd";
 const { Content: AntContent } = Layout;
 
-const PostsGrid = ({ posts }) => {
-  return (
-    <Row gutter={[12, 16]}>
-      {posts &&
-        posts.map((post) => (
+const PostsGrid = ({ posts, setPosts }) => {
+  if (posts) {
+    return (
+      <Row gutter={[12, 16]}>
+        {posts.map((post) => (
           <Col key={post._id} xxl={4} xl={6} lg={8} sm={12} xs={24}>
-            <Card post={post} />
+            <Card post={post} setPosts={setPosts} />
           </Col>
         ))}
-    </Row>
-  );
+      </Row>
+    );
+  }
+  return null;
 };
 
 export const Content = ({
@@ -27,7 +29,7 @@ export const Content = ({
   setCreatingPostMode,
   setAlert,
 }) => {
-  const [posts, setPosts] = useState(null);
+  const [posts, setPosts] = useState([]);
   const fetchPosts = async () => {
     if (activeCategory.name === "All") {
       return postsAPI.getAllPosts().then((res) => {
@@ -51,12 +53,13 @@ export const Content = ({
           categories={categories}
           setAlert={setAlert}
           setCreatingPostMode={setCreatingPostMode}
+          setPosts={setPosts}
         />
       ) : posts ? (
         posts.length != 0 ? (
           <>
             <Breadcrumb activeCategory={activeCategory} />
-            <PostsGrid posts={posts} />
+            <PostsGrid posts={posts} setPosts={setPosts} />
           </>
         ) : (
           <Empty style={{ margin: "64px 0" }} description="No posts" />
