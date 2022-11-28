@@ -58,7 +58,6 @@ export const Header = ({
             <Menu
               theme="dark"
               mode="horizontal"
-              defaultSelectedKeys={[categories[0]._id]}
               selectedKeys={[activeCategory._id]}
               items={navItems}
               onClick={({ key }) => handleActiveCategoryChange(key)}
