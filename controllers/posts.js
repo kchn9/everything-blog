@@ -62,6 +62,18 @@ postsRouter.get("/:id", (req, res, next) => {
     .catch((e) => next(e));
 });
 
+postsRouter.get("/covers/:id", (req, res, next) => {
+  const coverId = req.params.id;
+  Cover.findById(coverId)
+    .then((cover) => {
+      if (!cover) {
+        return res.sendStatus(404);
+      }
+      return res.status(200).json(cover);
+    })
+    .catch((e) => next(e));
+});
+
 postsRouter.post("/covers", upload.single("file"), (req, res, next) => {
   if (req.file) {
     const newCover = new Cover({
