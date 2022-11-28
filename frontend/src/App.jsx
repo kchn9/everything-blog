@@ -11,7 +11,7 @@ const App = () => {
     name: "All",
   });
   const [creatingPostMode, setCreatingPostMode] = useState(false);
-  const [categories, setCategories] = useState(null);
+  const [categories, setCategories] = useState([{}]);
   const fetchCategories = async () => {
     categoriesAPI.getAllCategories().then((res) => {
       setCategories(res);
