@@ -3,6 +3,9 @@ import axios from "axios";
 const coversEndpoint = "http://localhost:3000/api/v1/posts/covers";
 
 const coversAPI = {
+  getCoverById(coverId) {
+    return axios.get(`${coversEndpoint}/${coverId}`).then((res) => res.data);
+  },
   postCover(file) {
     const formData = new FormData();
     formData.append("file", file);

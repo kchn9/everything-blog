@@ -45,12 +45,12 @@ const AddNewPost = ({
   const [form] = Form.useForm();
   const title = Form.useWatch("title", form);
   const body = Form.useWatch("body", form);
+  const [filelist, setFilelist] = useState([]);
   const [coverId, setCoverId] = useState("");
   const selectedCategories = Form.useWatch("categories", form);
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(title, body, selectedCategories, coverId);
     postsAPI
       .postPost(title, body, selectedCategories, coverId)
       .then(({ post }) => {
@@ -74,6 +74,9 @@ const AddNewPost = ({
       body: "Ooops.. something went wrong, please check error fields and try again.",
       type: "error",
     });
+    if (coverId) {
+      coverAPI.deleteCoverById(coverId).catch((e) => console.error(e));
+    }
   }
 
   const categoriesOptions = useMemo(() => {
@@ -126,22 +129,61 @@ const AddNewPost = ({
           <Item label="Cover">
             <Upload
               listType="picture-card"
-              accept="image/jpeg, image/png"
-              maxCount={1}
+              fileList={filelist}
+              beforeUpload={(file) => {
+                const bytesLimit = 2_000_000;
+                const isTooBig = file.size > bytesLimit;
+                const acceptedFormats = ["image/png", "image/jpeg"];
+                const isNotAcceptedFormat = !acceptedFormats.includes(
+                  file.type
+                );
+                if (isTooBig || isNotAcceptedFormat) {
+                  return Upload.LIST_IGNORE;
+                }
+                return true;
+              }}
+              onChange={({ fileList }) => {
+                let newFilelist = [...fileList];
+                if (newFilelist.length > 1) {
+                  const coverToDelete = newFilelist[0].response;
+                  coverAPI
+                    .deleteCoverById(coverToDelete._id)
+                    .catch((e) =>
+                      console.error("Unable to delete old cover", e)
+                    );
+                  newFilelist = newFilelist.slice(-1);
+                }
+                setFilelist(newFilelist);
+              }}
+              onRemove={(file) => {
+                const coverToDelete = file.response;
+                coverAPI
+                  .deleteCoverById(coverToDelete._id)
+                  .then(() => {
+                    return true;
+                  })
+                  .catch((e) => {
+                    console.error("Unable to delete old cover", e);
+                    return false;
+                  });
+              }}
               customRequest={({ file, onSuccess, onError }) => {
                 coverAPI
                   .postCover(file)
                   .then((response) => {
                     setCoverId(response._id);
-                    onSuccess(file);
+                    onSuccess(response);
                   })
                   .catch((e) => {
-                    onError(e);
+                    onError(e, file);
                   });
               }}
             >
               <Button icon={<UploadOutlined />}>Upload</Button>
             </Upload>
+            <Typography.Text type="secondary">
+              Maximum file size is 2MB. Accepted formats are .jpg/.jpeg and .png
+            </Typography.Text>
           </Item>
           <Item label="Categories" name="categories">
             <Select
