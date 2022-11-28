@@ -82,6 +82,18 @@ postsRouter.post("/covers", upload.single("file"), (req, res, next) => {
   }
 });
 
+postsRouter.delete("/covers/:id", (req, res, next) => {
+  const coverId = req.params.id;
+  Cover.findByIdAndDelete(coverId)
+    .then((deletedCover) => {
+      if (!deletedCover) {
+        return res.sendStatus(404);
+      }
+      return res.status(200).json(deletedCover);
+    })
+    .catch((e) => next(e));
+});
+
 postsRouter.post("/", (req, res, next) => {
   const body = req.body;
 
