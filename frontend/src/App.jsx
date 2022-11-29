@@ -14,7 +14,7 @@ const App = () => {
     state: false,
     mode: "add",
     data: {
-      postId: "",
+      post: {},
     },
   });
   const [categories, setCategories] = useState([{}]);

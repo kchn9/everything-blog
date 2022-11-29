@@ -1,38 +1,139 @@
 import postsAPI from "./services/postsAPI";
 import coverAPI from "./services/coversAPI";
-import { Typography, Form, Input, Select, Empty, Tag, Button } from "antd";
+import { Typography, Form, Input, Select, Empty, Image, Button } from "antd";
+import { Buffer } from "buffer";
 import { CoverUpload } from "./CoverUpload";
 import { CategoryTag } from "./CategoryTag";
 import { useState, useMemo } from "react";
+import { useEffect } from "react";
 const { Item } = Form;
 
-const PostForm = ({ categories, setAlert, setPostEditor, setPosts }) => {
+const PostForm = ({
+  postEditor,
+  categories,
+  setAlert,
+  setPostEditor,
+  setPosts,
+}) => {
   const [form] = Form.useForm();
-  const [coverId, setCoverId] = useState("");
   const title = Form.useWatch("title", form);
   const body = Form.useWatch("body", form);
   const selectedCategories = Form.useWatch("categories", form);
 
+  const [coverId, setCoverId] = useState("");
+  const [oldCover, setOldCover] = useState({
+    _id: "",
+    src: "",
+  });
+  const fetchOldCoverSrc = () => {
+    coverAPI.getCoverById(coverId).then(({ file }) => {
+      const buffer = file.data.data;
+      const b64 = Buffer.from(buffer).toString("base64");
+      const mimeType = file.contentType;
+      setOldCover((prev) => ({
+        ...prev,
+        src: `data:${mimeType};base64,${b64}`,
+      }));
+    });
+  };
+  useEffect(() => {
+    if (coverId && postEditor && postEditor.mode === "update") {
+      setOldCover((prev) => ({
+        ...prev,
+        _id: coverId,
+      }));
+      fetchOldCoverSrc();
+    }
+  }, []);
+
+  const initialValues = useMemo(() => {
+    if (postEditor && postEditor.mode === "create") {
+      return {
+        title: "",
+        body: "",
+        categories: [],
+      };
+    }
+    if (
+      postEditor &&
+      postEditor.data &&
+      postEditor.data.post &&
+      postEditor.mode === "update"
+    ) {
+      setCoverId(postEditor.data.post.coverId);
+      return {
+        title: postEditor.data.post.title,
+        body: postEditor.data.post.body,
+        categories: postEditor.data.post.categories,
+      };
+    }
+  }, []);
+
   function handleSubmit(e) {
     e.preventDefault();
-    postsAPI
-      .postPost(title, body, selectedCategories, coverId)
-      .then(({ post }) => {
-        setPosts((prev) => [...prev, post]);
-      })
-      .catch((e) => console.log(e));
+    if (postEditor && postEditor.mode === "create") {
+      postsAPI
+        .postPost(title, body, selectedCategories, coverId)
+        .then(({ post }) => {
+          setPosts((prev) => [...prev, post]);
+        })
+        .catch((e) => console.log(e));
+    } else if (
+      postEditor &&
+      postEditor.data &&
+      postEditor.data.post &&
+      postEditor.mode === "update"
+    ) {
+      postsAPI
+        .updatePostById(
+          postEditor.data.post._id,
+          title,
+          body,
+          selectedCategories,
+          coverId
+        )
+        .then((post) => {
+          if (oldCover._id !== coverId) {
+            coverAPI
+              .deleteCoverById(oldCover._id)
+              .then(() =>
+                setPosts((prev) => [
+                  ...prev.filter((p) => p._id !== post._id),
+                  post,
+                ])
+              )
+              .catch((e) => console.log("Unable to delete old cover", e));
+          } else {
+            setPosts((prev) => [
+              ...prev.filter((p) => p._id !== post._id),
+              post,
+            ]);
+          }
+        })
+        .catch((e) => console.log(e));
+    }
   }
 
   function handleSuccessfullFinish() {
     setPostEditor((prev) => ({
       ...prev,
+      data: {},
       state: false,
     }));
-    setAlert({
-      title: "Success",
-      body: "Your post has been added successfully.",
-      type: "success",
-    });
+    if (postEditor.mode === "update") {
+      setAlert({
+        title: "Success",
+        body: "Your post has been updated successfully.",
+        type: "success",
+      });
+    }
+    if (postEditor.mode === "create") {
+      setAlert({
+        title: "Success",
+        body: "Your post has been added successfully.",
+        type: "success",
+      });
+    }
   }
 
   function handleFailedFinish() {
@@ -41,9 +142,6 @@ const PostForm = ({ categories, setAlert, setPostEditor, setPosts }) => {
       body: "Ooops.. something went wrong, please check error fields and try again.",
       type: "error",
     });
-    if (coverId) {
-      coverAPI.deleteCoverById(coverId).catch((e) => console.log(e));
-    }
   }
 
   const categoriesOptions = useMemo(() => {
@@ -67,12 +165,14 @@ const PostForm = ({ categories, setAlert, setPostEditor, setPosts }) => {
       }}
     >
       <Typography.Title level={2} style={{ margin: "0 auto 48px auto" }}>
-        Creating new post
+        {postEditor && postEditor.mode === "create" && "Creating new post"}
+        {postEditor && postEditor.mode === "update" && "Updating post"}
       </Typography.Title>
       <Form
         onSubmitCapture={handleSubmit}
         onFinish={handleSuccessfullFinish}
         onFinishFailed={handleFailedFinish}
+        initialValues={initialValues}
         form={form}
         name="post"
         labelCol={{ span: 6 }}
@@ -85,15 +185,28 @@ const PostForm = ({ categories, setAlert, setPostEditor, setPosts }) => {
           name="title"
           rules={[
             {
-              required: true,
+              required: postEditor.mode === "create",
               message: "Please input post title",
             },
           ]}
         >
           <Input placeholder="Please input post title" />
         </Item>
+        {coverId &&
+          postEditor &&
+          postEditor.mode === "update" &&
+          oldCover &&
+          oldCover.src && (
+            <Item label="Current cover">
+              <Image height={200} src={oldCover.src} />
+            </Item>
+          )}
         <Item label="Cover">
-          <CoverUpload setCoverId={setCoverId} />
+          <CoverUpload
+            mode={postEditor.mode}
+            oldCoverId={oldCover._id}
+            setCoverId={setCoverId}
+          />
           <Typography.Text type="secondary">
             Maximum file size is 2MB. Accepted formats are .jpg/.jpeg and .png
           </Typography.Text>
@@ -119,7 +232,7 @@ const PostForm = ({ categories, setAlert, setPostEditor, setPosts }) => {
           name="body"
           rules={[
             {
-              required: true,
+              required: postEditor.mode === "create",
               message: "Please input post content",
             },
           ]}

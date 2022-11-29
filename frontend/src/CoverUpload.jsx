@@ -3,12 +3,12 @@ import { Upload, Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
-const CoverUpload = ({ setCoverId }) => {
+const CoverUpload = ({ mode, oldCoverId, setCoverId }) => {
   const [filelist, setFilelist] = useState([]);
 
   return (
     <Upload
-      listType="picture-card"
+      listType="picture"
       fileList={filelist}
       beforeUpload={(file) => {
         const bytesLimit = 2_000_000;
@@ -36,6 +36,9 @@ const CoverUpload = ({ setCoverId }) => {
         coverAPI
           .deleteCoverById(coverToDelete._id)
           .then(() => {
+            if (mode === "update") {
+              setCoverId(oldCoverId);
+            }
             return true;
           })
           .catch((e) => {
@@ -55,7 +58,9 @@ const CoverUpload = ({ setCoverId }) => {
           });
       }}
     >
-      <Button icon={<UploadOutlined />}>Upload</Button>
+      <Button icon={<UploadOutlined />}>
+        {mode === "update" ? "Change cover" : "Upload"}
+      </Button>
     </Upload>
   );
 };
