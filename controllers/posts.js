@@ -50,30 +50,6 @@ postsRouter.get("/search", (req, res, next) => {
   }
 });
 
-postsRouter.get("/:id", (req, res, next) => {
-  const postId = req.params.id;
-  Post.findById(postId)
-    .then((post) => {
-      if (!post) {
-        return res.sendStatus(404);
-      }
-      return res.status(200).json(post);
-    })
-    .catch((e) => next(e));
-});
-
-postsRouter.get("/covers/:id", (req, res, next) => {
-  const coverId = req.params.id;
-  Cover.findById(coverId)
-    .then((cover) => {
-      if (!cover) {
-        return res.sendStatus(404);
-      }
-      return res.status(200).json(cover);
-    })
-    .catch((e) => next(e));
-});
-
 postsRouter.post("/covers", upload.single("file"), (req, res, next) => {
   if (req.file) {
     const newCover = new Cover({
@@ -94,6 +70,18 @@ postsRouter.post("/covers", upload.single("file"), (req, res, next) => {
   }
 });
 
+postsRouter.get("/covers/:id", (req, res, next) => {
+  const coverId = req.params.id;
+  Cover.findById(coverId)
+    .then((cover) => {
+      if (!cover) {
+        return res.sendStatus(404);
+      }
+      return res.status(200).json(cover);
+    })
+    .catch((e) => next(e));
+});
+
 postsRouter.delete("/covers/:id", (req, res, next) => {
   const coverId = req.params.id;
   Cover.findByIdAndDelete(coverId)
@@ -102,6 +90,18 @@ postsRouter.delete("/covers/:id", (req, res, next) => {
         return res.sendStatus(404);
       }
       return res.status(200).json(deletedCover);
+    })
+    .catch((e) => next(e));
+});
+
+postsRouter.get("/:id", (req, res, next) => {
+  const postId = req.params.id;
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        return res.sendStatus(404);
+      }
+      return res.status(200).json(post);
     })
     .catch((e) => next(e));
 });
@@ -151,13 +151,20 @@ postsRouter.put("/:id", (req, res, next) => {
     title: body.title,
     body: body.body,
     categories: body.categories,
+    coverId: body.coverId,
   };
   Post.findByIdAndUpdate(postId, updateQuery, { new: true })
     .then((updatedPost) => {
       if (!updatedPost) {
         return res.sendStatus(404);
       }
-
+      if (updateQuery.coverId) {
+        Cover.findByIdAndUpdate(
+          updateQuery.coverId,
+          { $set: { postId: updatedPost._id } },
+          { new: true }
+        ).catch((e) => next(e));
+      }
       if (updateQuery.categories) {
         for (const categoryId of updateQuery.categories) {
           Category.findByIdAndUpdate(
@@ -181,6 +188,20 @@ postsRouter.delete("/:id", (req, res, next) => {
     .then((deletedPost) => {
       if (!deletedPost) {
         return res.sendStatus(404);
+      }
+      if (deletedPost.coverId) {
+        Cover.findByIdAndDelete(deletedPost.coverId).catch((e) => next(e));
+      }
+      if (deletedPost.categories) {
+        for (const categoryId of deletedPost.categories) {
+          Category.findByIdAndUpdate(
+            categoryId,
+            {
+              $pull: { posts: deletedPost._id },
+            },
+            { new: true }
+          ).catch((e) => next(e));
+        }
       }
       return res.status(200).json(deletedPost);
     })

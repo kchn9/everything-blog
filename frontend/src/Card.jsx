@@ -11,7 +11,7 @@ import { Card as AntCard, Typography, Image } from "antd";
 import { useState, useEffect } from "react";
 const { Meta } = AntCard;
 
-const Card = ({ setPostEditor, post, setPosts }) => {
+const Card = ({ setPostEditor, post, setPosts, setAlert }) => {
   const [src, setSrc] = useState("");
   function fetchCover() {
     if (post) {
@@ -20,7 +20,7 @@ const Card = ({ setPostEditor, post, setPosts }) => {
         .then(({ file }) => {
           const buffer = file.data.data;
           const b64 = Buffer.from(buffer).toString("base64");
-          const mimeType = file.data.contentType;
+          const mimeType = file.contentType;
           setSrc(`data:${mimeType};base64,${b64}`);
         })
         .catch((e) => console.error(e));
@@ -28,21 +28,36 @@ const Card = ({ setPostEditor, post, setPosts }) => {
   }
   useEffect(() => {
     fetchCover();
-  }, []);
+  }, [post]);
 
   function handlePostEdit() {
     setPostEditor({
       state: true,
       mode: "update",
       data: {
-        postId: post._id,
+        post,
       },
     });
   }
   function handlePostDelete() {
-    postsAPI.deletePostById(post._id).then(() => {
-      setPosts((prev) => [...prev].filter((p) => p._id !== post._id));
-    });
+    postsAPI
+      .deletePostById(post._id)
+      .then(() => {
+        setAlert({
+          title: "Success",
+          body: "Your post has been deleted successfully.",
+          type: "success",
+        });
+        setPosts((prev) => [...prev].filter((p) => p._id !== post._id));
+      })
+      .catch((e) => {
+        console.log(e);
+        setAlert({
+          title: "Error",
+          body: "Oops... something went wrong, try again later.",
+          type: "error",
+        });
+      });
   }
   const actions = [
     <ExpandOutlined key="show" />,

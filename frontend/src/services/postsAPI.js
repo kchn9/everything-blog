@@ -6,13 +6,23 @@ const postsAPI = {
   getAllPosts() {
     return axios.get(postsEndpoint).then((res) => res.data);
   },
-  postPost(title, body, categories, cover) {
+  postPost(title, body, categories, coverId) {
     return axios
       .post(postsEndpoint, {
         title,
         body,
         categories,
-        coverId: cover,
+        coverId,
+      })
+      .then((res) => res.data);
+  },
+  updatePostById(postId, title, body, categories, coverId) {
+    return axios
+      .put(`${postsEndpoint}/${postId}`, {
+        title,
+        body,
+        categories,
+        coverId,
       })
       .then((res) => res.data);
   },
