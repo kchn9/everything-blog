@@ -10,7 +10,13 @@ const App = () => {
     _id: "0",
     name: "All",
   });
-  const [creatingPostMode, setCreatingPostMode] = useState(false);
+  const [postEditor, setPostEditor] = useState({
+    state: false,
+    mode: "add",
+    data: {
+      postId: "",
+    },
+  });
   const [categories, setCategories] = useState([{}]);
   const fetchCategories = async () => {
     categoriesAPI.getAllCategories().then((res) => {
@@ -32,14 +38,14 @@ const App = () => {
         categories={categories}
         activeCategory={activeCategory}
         setActiveCategory={setActiveCategory}
-        creatingPostMode={creatingPostMode}
-        setCreatingPostMode={setCreatingPostMode}
+        postEditor={postEditor}
+        setPostEditor={setPostEditor}
       />
       <Content
         categories={categories}
         activeCategory={activeCategory}
-        creatingPostMode={creatingPostMode}
-        setCreatingPostMode={setCreatingPostMode}
+        postEditor={postEditor}
+        setPostEditor={setPostEditor}
         setAlert={setAlert}
       />
       <Alert title={alert.title} errorBody={alert.body} type={alert.type} />

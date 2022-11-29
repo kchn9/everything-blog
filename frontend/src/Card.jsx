@@ -1,14 +1,44 @@
 import postsAPI from "./services/postsAPI";
+import coversAPI from "./services/coversAPI";
 import { truncate } from "./util/truncate";
+import { Buffer } from "buffer";
 import {
   ExpandOutlined,
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { Card as AntCard, Typography } from "antd";
+import { Card as AntCard, Typography, Image } from "antd";
+import { useState, useEffect } from "react";
 const { Meta } = AntCard;
 
-const Card = ({ post, setPosts }) => {
+const Card = ({ setPostEditor, post, setPosts }) => {
+  const [src, setSrc] = useState("");
+  function fetchCover() {
+    if (post) {
+      coversAPI
+        .getCoverById(post.coverId)
+        .then(({ file }) => {
+          const buffer = file.data.data;
+          const b64 = Buffer.from(buffer).toString("base64");
+          const mimeType = file.data.contentType;
+          setSrc(`data:${mimeType};base64,${b64}`);
+        })
+        .catch((e) => console.error(e));
+    }
+  }
+  useEffect(() => {
+    fetchCover();
+  }, []);
+
+  function handlePostEdit() {
+    setPostEditor({
+      state: true,
+      mode: "update",
+      data: {
+        postId: post._id,
+      },
+    });
+  }
   function handlePostDelete() {
     postsAPI.deletePostById(post._id).then(() => {
       setPosts((prev) => [...prev].filter((p) => p._id !== post._id));
@@ -16,7 +46,7 @@ const Card = ({ post, setPosts }) => {
   }
   const actions = [
     <ExpandOutlined key="show" />,
-    <EditOutlined key="edit" />,
+    <EditOutlined key="edit" onClick={() => handlePostEdit()} />,
     <DeleteOutlined
       key="edit"
       className="delete-icon"
@@ -29,9 +59,16 @@ const Card = ({ post, setPosts }) => {
       bordered={false}
       hoverable
       cover={
-        <img
-          style={{ borderRadius: 0 }}
-          src="https://random.imagecdn.app/500/500"
+        <Image
+          preview={false}
+          style={{
+            borderRadius: "0",
+            objectFit: "cover",
+            maxHeight: "50vh",
+            objectPosition: "50% 50%",
+            backgroundColor: "grey",
+          }}
+          src={src}
         />
       }
       actions={actions}

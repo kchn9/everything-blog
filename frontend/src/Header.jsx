@@ -8,8 +8,8 @@ export const Header = ({
   categories,
   activeCategory,
   setActiveCategory,
-  creatingPostMode,
-  setCreatingPostMode,
+  postEditor,
+  setPostEditor,
 }) => {
   const navItems = useMemo(() => {
     if (categories) {
@@ -54,7 +54,7 @@ export const Header = ({
           <div className="logo">EverythingBlog</div>
 
           <div style={{ flex: "1" }}></div>
-          {!creatingPostMode && (
+          {!postEditor.state && (
             <Menu
               theme="dark"
               mode="horizontal"
@@ -70,8 +70,8 @@ export const Header = ({
 
           <div style={{ flex: "1 48px" }}></div>
           <CreateModeButton
-            creatingPostMode={creatingPostMode}
-            setCreatingPostMode={setCreatingPostMode}
+            postEditor={postEditor}
+            setPostEditor={setPostEditor}
           />
         </div>
       ) : (
@@ -83,8 +83,8 @@ export const Header = ({
           }}
         >
           <CreateModeButton
-            creatingPostMode={creatingPostMode}
-            setCreatingPostMode={setCreatingPostMode}
+            postEditor={postEditor}
+            setPostEditor={setPostEditor}
           />
           <div className="logo" style={{ marginRight: 46 }}>
             EverythingBlog
@@ -137,7 +137,7 @@ export const Header = ({
               onClick={(e) => e.preventDefault()}
               style={{ float: "right", marginLeft: "50px" }}
             >
-              <Space style={{ display: creatingPostMode && "none" }}>
+              <Space style={{ display: postEditor.state && "none" }}>
                 <MenuOutlined />
               </Space>
             </a>
@@ -148,12 +148,16 @@ export const Header = ({
   );
 };
 
-const CreateModeButton = ({ creatingPostMode, setCreatingPostMode }) => {
-  function handleCreateModeChange(stateBoolean) {
-    setCreatingPostMode(stateBoolean);
+const CreateModeButton = ({ postEditor, setPostEditor }) => {
+  function handleCreateModeChange(state) {
+    setPostEditor({
+      state,
+      mode: "create",
+      data: {},
+    });
   }
 
-  if (creatingPostMode) {
+  if (postEditor.state) {
     return (
       <Button onClick={() => handleCreateModeChange(false)}>
         Back to posts
