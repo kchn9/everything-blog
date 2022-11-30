@@ -32,12 +32,8 @@ const VerticalDropdown = ({ menu }) => {
   );
 };
 
-const VerticalNav = ({
-  postEditor,
-  navItems,
-  handleActiveCategoryChange,
-  setPostEditor,
-}) => {
+const VerticalNav = ({ navItems, handleActiveCategoryChange }) => {
+  const shouldDisplayMenuIcon = useAppStore((state) => state.postEditor.state);
   const activeCategory = useAppStore((state) => state.activeCategory);
   return (
     <div
@@ -47,7 +43,7 @@ const VerticalNav = ({
         justifyContent: "space-between",
       }}
     >
-      <PostEditorButton postEditor={postEditor} setPostEditor={setPostEditor} />
+      <PostEditorButton />
       <div className="logo" style={{ marginRight: 46 }}>
         EverythingBlog
       </div>
@@ -74,7 +70,7 @@ const VerticalNav = ({
           onClick={(e) => e.preventDefault()}
           style={{ float: "right", marginLeft: "50px" }}
         >
-          <Space style={{ display: postEditor.state && "none" }}>
+          <Space style={{ display: shouldDisplayMenuIcon && "none" }}>
             <MenuOutlined />
           </Space>
         </a>

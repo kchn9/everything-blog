@@ -1,6 +1,10 @@
+import { useAppStore } from "./hooks/useAppStore";
 import { Button } from "antd";
 
-const PostEditorButton = ({ postEditor, setPostEditor }) => {
+const PostEditorButton = () => {
+  const editorState = useAppStore((state) => state.postEditor.state);
+  const setPostEditor = useAppStore((state) => state.setPostEditor);
+
   function handleCreateModeChange(state) {
     setPostEditor({
       state,
@@ -9,7 +13,7 @@ const PostEditorButton = ({ postEditor, setPostEditor }) => {
     });
   }
 
-  if (postEditor.state) {
+  if (editorState) {
     return (
       <Button onClick={() => handleCreateModeChange(false)}>
         Back to posts

@@ -2,12 +2,8 @@ import { useAppStore } from "./hooks/useAppStore";
 import { PostEditorButton } from "./PostEditorButton";
 import { Menu } from "antd";
 
-const HorizontalNav = ({
-  postEditor,
-  navItems,
-  handleActiveCategoryChange,
-  setPostEditor,
-}) => {
+const HorizontalNav = ({ navItems, handleActiveCategoryChange }) => {
+  const shouldRenderMenu = !useAppStore((state) => state.postEditor.state);
   const activeCategory = useAppStore((state) => state.activeCategory);
   return (
     <div
@@ -20,7 +16,7 @@ const HorizontalNav = ({
       <div className="logo">EverythingBlog</div>
 
       <div style={{ flex: "1" }}></div>
-      {!postEditor.state && (
+      {shouldRenderMenu && (
         <Menu
           theme="dark"
           mode="horizontal"
@@ -35,7 +31,7 @@ const HorizontalNav = ({
       )}
 
       <div style={{ flex: "1 48px" }}></div>
-      <PostEditorButton postEditor={postEditor} setPostEditor={setPostEditor} />
+      <PostEditorButton />
     </div>
   );
 };

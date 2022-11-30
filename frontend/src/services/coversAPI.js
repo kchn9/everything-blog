@@ -1,10 +1,19 @@
 import axios from "axios";
+import { Buffer } from "buffer";
 
 const coversEndpoint = "http://localhost:3000/api/v1/posts/covers";
 
 const coversAPI = {
-  getCoverById(coverId) {
-    return axios.get(`${coversEndpoint}/${coverId}`).then((res) => res.data);
+  getCoverSrcById(coverId) {
+    return axios
+      .get(`${coversEndpoint}/${coverId}`)
+      .then((res) => res.data)
+      .then(({ file }) => {
+        const buffer = file.data.data;
+        const b64 = Buffer.from(buffer).toString("base64");
+        const mimeType = file.contentType;
+        return `data:${mimeType};base64,${b64}`;
+      });
   },
   postCover(file) {
     const formData = new FormData();

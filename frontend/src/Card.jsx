@@ -1,7 +1,6 @@
 import postsAPI from "./services/postsAPI";
 import coversAPI from "./services/coversAPI";
 import truncate from "./util/truncate";
-import { Buffer } from "buffer";
 import {
   ExpandOutlined,
   EditOutlined,
@@ -9,19 +8,19 @@ import {
 } from "@ant-design/icons";
 import { Card as AntCard, Typography, Image } from "antd";
 import { useState, useEffect } from "react";
+import { useAppStore } from "./hooks/useAppStore";
 const { Meta } = AntCard;
 
-const Card = ({ setPostEditor, post, setPosts, messageApi }) => {
+const Card = ({ post, messageApi }) => {
   const [src, setSrc] = useState("");
+  const deletePost = useAppStore((state) => state.deletePost);
+  const setPostEditor = useAppStore((state) => state.setPostEditor);
   function fetchCover() {
     if (post && post.coverId) {
       coversAPI
-        .getCoverById(post.coverId)
-        .then(({ file }) => {
-          const buffer = file.data.data;
-          const b64 = Buffer.from(buffer).toString("base64");
-          const mimeType = file.contentType;
-          setSrc(`data:${mimeType};base64,${b64}`);
+        .getCoverSrcById(post.coverId)
+        .then((src) => {
+          setSrc(src);
         })
         .catch((e) => console.error(e));
     }
@@ -44,7 +43,7 @@ const Card = ({ setPostEditor, post, setPosts, messageApi }) => {
       .deletePostById(post._id)
       .then(() => {
         messageApi.success("Your post has been deleted successfully.", 1);
-        setPosts((prev) => [...prev].filter((p) => p._id !== post._id));
+        deletePost(post);
       })
       .catch((e) => {
         console.log(e);
