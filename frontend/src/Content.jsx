@@ -6,15 +6,12 @@ import { PostForm } from "./PostForm";
 import { Loader } from "./Loader";
 import { Layout, Empty } from "antd";
 import { PostsGrid } from "./PostsGrid";
+import { useAppStore } from "./hooks/useAppStore";
 const { Content: AntContent } = Layout;
 
-export const Content = ({
-  categories,
-  activeCategory,
-  postEditor,
-  setPostEditor,
-  messageApi,
-}) => {
+export const Content = ({ postEditor, setPostEditor, messageApi }) => {
+  const activeCategory = useAppStore((state) => state.activeCategory);
+  const categories = useAppStore((state) => state.categories);
   const [posts, setPosts] = useState(null);
   const fetchPosts = async () => {
     if (activeCategory.name === "All") {

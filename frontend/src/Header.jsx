@@ -1,17 +1,13 @@
 import { Layout } from "antd";
 import { useMemo } from "react";
 import { useWindowSize } from "./hooks/useWindowSize";
+import { useAppStore } from "./hooks/useAppStore";
 import { HorizontalNav } from "./HorizontalNav";
 import { VerticalNav } from "./VerticalNav";
 const { Header: AntHeader } = Layout;
 
-export const Header = ({
-  categories,
-  activeCategory,
-  setActiveCategory,
-  postEditor,
-  setPostEditor,
-}) => {
+export const Header = ({ postEditor, setPostEditor }) => {
+  const categories = useAppStore((state) => state.categories);
   const navItems = useMemo(() => {
     if (categories) {
       return [
@@ -27,15 +23,18 @@ export const Header = ({
     }
   }, [categories]);
 
+  const changeActiveCategory = useAppStore(
+    (state) => state.changeActiveCategory
+  );
   function handleActiveCategoryChange(key) {
     if (key === "0") {
-      setActiveCategory({
+      changeActiveCategory({
         _id: key,
         name: "All",
       });
     } else {
       const categoryToSet = categories.find((category) => category._id === key);
-      setActiveCategory(categoryToSet);
+      changeActiveCategory(categoryToSet);
     }
   }
 
@@ -47,7 +46,6 @@ export const Header = ({
       {width > 768 && categories ? (
         <HorizontalNav
           postEditor={postEditor}
-          activeCategory={activeCategory}
           navItems={navItems}
           handleActiveCategoryChange={handleActiveCategoryChange}
           setPostEditor={setPostEditor}
@@ -55,7 +53,6 @@ export const Header = ({
       ) : (
         <VerticalNav
           postEditor={postEditor}
-          activeCategory={activeCategory}
           navItems={navItems}
           handleActiveCategoryChange={handleActiveCategoryChange}
           setPostEditor={setPostEditor}

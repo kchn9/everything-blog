@@ -1,3 +1,4 @@
+import { useAppStore } from "./hooks/useAppStore";
 import { MenuOutlined } from "@ant-design/icons";
 import { PostEditorButton } from "./PostEditorButton";
 import { Dropdown, Divider, Space } from "antd";
@@ -33,11 +34,11 @@ const VerticalDropdown = ({ menu }) => {
 
 const VerticalNav = ({
   postEditor,
-  activeCategory,
   navItems,
   handleActiveCategoryChange,
   setPostEditor,
 }) => {
+  const activeCategory = useAppStore((state) => state.activeCategory);
   return (
     <div
       style={{

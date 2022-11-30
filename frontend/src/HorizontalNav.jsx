@@ -1,13 +1,14 @@
+import { useAppStore } from "./hooks/useAppStore";
 import { PostEditorButton } from "./PostEditorButton";
 import { Menu } from "antd";
 
 const HorizontalNav = ({
   postEditor,
-  activeCategory,
   navItems,
   handleActiveCategoryChange,
   setPostEditor,
 }) => {
+  const activeCategory = useAppStore((state) => state.activeCategory);
   return (
     <div
       style={{
