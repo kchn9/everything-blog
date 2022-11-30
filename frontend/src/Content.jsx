@@ -7,7 +7,7 @@ import { PostForm } from "./PostForm";
 import { Layout, Row, Col, Spin, Empty, Typography } from "antd";
 const { Content: AntContent } = Layout;
 
-const PostsGrid = ({ setPostEditor, posts, setPosts, setAlert }) => {
+const PostsGrid = ({ setPostEditor, posts, setPosts, messageApi }) => {
   if (posts) {
     return (
       <Row gutter={[12, 16]}>
@@ -17,7 +17,7 @@ const PostsGrid = ({ setPostEditor, posts, setPosts, setAlert }) => {
               post={post}
               setPostEditor={setPostEditor}
               setPosts={setPosts}
-              setAlert={setAlert}
+              messageApi={messageApi}
             />
           </Col>
         ))}
@@ -32,7 +32,7 @@ export const Content = ({
   activeCategory,
   postEditor,
   setPostEditor,
-  setAlert,
+  messageApi,
 }) => {
   const [posts, setPosts] = useState([]);
   const fetchPosts = async () => {
@@ -57,7 +57,7 @@ export const Content = ({
         <PostForm
           postEditor={postEditor}
           categories={categories}
-          setAlert={setAlert}
+          messageApi={messageApi}
           setPostEditor={setPostEditor}
           setPosts={setPosts}
         />
@@ -69,7 +69,7 @@ export const Content = ({
               setPostEditor={setPostEditor}
               posts={posts}
               setPosts={setPosts}
-              setAlert={setAlert}
+              messageApi={messageApi}
             />
           </>
         ) : (

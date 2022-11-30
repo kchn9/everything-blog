@@ -11,7 +11,7 @@ const { Item } = Form;
 const PostForm = ({
   postEditor,
   categories,
-  setAlert,
+  messageApi,
   setPostEditor,
   setPosts,
 }) => {
@@ -84,6 +84,16 @@ const PostForm = ({
       postEditor.data.post &&
       postEditor.mode === "update"
     ) {
+      if (
+        postEditor.data.post.title === title &&
+        postEditor.data.post.body === body &&
+        JSON.stringify(postEditor.data.post.categories) ===
+          JSON.stringify(selectedCategories) &&
+        coverId === oldCover._id
+      ) {
+        return false;
+      }
+
       postsAPI
         .updatePostById(
           postEditor.data.post._id,
@@ -121,27 +131,17 @@ const PostForm = ({
       state: false,
     }));
     if (postEditor.mode === "update") {
-      setAlert({
-        title: "Success",
-        body: "Your post has been updated successfully.",
-        type: "success",
-      });
+      messageApi.success("Your post has been updated successfully.");
     }
     if (postEditor.mode === "create") {
-      setAlert({
-        title: "Success",
-        body: "Your post has been added successfully.",
-        type: "success",
-      });
+      messageApi.success("Your post has been added successfully.");
     }
   }
 
   function handleFailedFinish() {
-    setAlert({
-      title: "Error",
-      body: "Ooops.. something went wrong, please check error fields and try again.",
-      type: "error",
-    });
+    messageApi.error(
+      "Ooops.. something went wrong, please check error fields and try again."
+    );
   }
 
   const categoriesOptions = useMemo(() => {

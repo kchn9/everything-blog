@@ -11,7 +11,7 @@ import { Card as AntCard, Typography, Image } from "antd";
 import { useState, useEffect } from "react";
 const { Meta } = AntCard;
 
-const Card = ({ setPostEditor, post, setPosts, setAlert }) => {
+const Card = ({ setPostEditor, post, setPosts, messageApi }) => {
   const [src, setSrc] = useState("");
   function fetchCover() {
     if (post) {
@@ -43,20 +43,12 @@ const Card = ({ setPostEditor, post, setPosts, setAlert }) => {
     postsAPI
       .deletePostById(post._id)
       .then(() => {
-        setAlert({
-          title: "Success",
-          body: "Your post has been deleted successfully.",
-          type: "success",
-        });
+        messageApi.success("Your post has been deleted successfully.", 1);
         setPosts((prev) => [...prev].filter((p) => p._id !== post._id));
       })
       .catch((e) => {
         console.log(e);
-        setAlert({
-          title: "Error",
-          body: "Oops... something went wrong, try again later.",
-          type: "error",
-        });
+        messageApi.error("Oops... something went wrong, try again later.", 1);
       });
   }
   const actions = [
