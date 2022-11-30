@@ -8,6 +8,27 @@ import { useState, useMemo } from "react";
 import { useEffect } from "react";
 const { Item } = Form;
 
+function updateModeReady(postEditor) {
+  return (
+    postEditor &&
+    postEditor.data &&
+    postEditor.data.post &&
+    postEditor.mode === "update"
+  );
+}
+
+const fetchOldCoverSrcById = (coverId) => {
+  coverAPI
+    .getCoverById(coverId)
+    .then(({ file }) => {
+      const buffer = file.data.data;
+      const b64 = Buffer.from(buffer).toString("base64");
+      const mimeType = file.contentType;
+      return `data:${mimeType};base64,${b64}`;
+    })
+    .catch((e) => console.log("Unable to fetch old cover", e));
+};
+
 const PostForm = ({
   postEditor,
   categories,
@@ -15,85 +36,70 @@ const PostForm = ({
   setPostEditor,
   setPosts,
 }) => {
+  // form values
   const [form] = Form.useForm();
   const title = Form.useWatch("title", form);
   const body = Form.useWatch("body", form);
   const selectedCategories = Form.useWatch("categories", form);
 
-  const [coverId, setCoverId] = useState("");
-  const [oldCover, setOldCover] = useState({
-    _id: "",
-    src: "",
-  });
-  const fetchOldCoverSrc = () => {
-    coverAPI.getCoverById(coverId).then(({ file }) => {
-      const buffer = file.data.data;
-      const b64 = Buffer.from(buffer).toString("base64");
-      const mimeType = file.contentType;
-      setOldCover((prev) => ({
-        ...prev,
-        src: `data:${mimeType};base64,${b64}`,
-      }));
-    });
-  };
-  useEffect(() => {
-    if (coverId && postEditor && postEditor.mode === "update") {
-      setOldCover((prev) => ({
-        ...prev,
-        _id: coverId,
-      }));
-      fetchOldCoverSrc();
-    }
-  }, []);
+  // helper
+  function fieldsChanged() {
+    return (
+      postEditor.data.post.title !== title ||
+      postEditor.data.post.body !== body ||
+      JSON.stringify(postEditor.data.post.categories) !==
+        JSON.stringify(selectedCategories) ||
+      coverId !== oldCover._id
+    );
+  }
 
-  const initialValues = useMemo(() => {
-    if (postEditor && postEditor.mode === "create") {
+  // state
+  const [coverId, setCoverId] = useState(() => {
+    return updateModeReady(postEditor)
+      ? postEditor.data.post.coverId
+      : undefined;
+  });
+  const [initialValues, _setInitialValues] = useState(() => {
+    if (updateModeReady(postEditor)) {
+      return {
+        title: postEditor.data.post.title,
+        body: postEditor.data.post.body,
+        categories: postEditor.data.post.categories,
+      };
+    } else {
       return {
         title: "",
         body: "",
         categories: [],
       };
     }
-    if (
-      postEditor &&
-      postEditor.data &&
-      postEditor.data.post &&
-      postEditor.mode === "update"
-    ) {
-      setCoverId(postEditor.data.post.coverId);
-      return {
-        title: postEditor.data.post.title,
-        body: postEditor.data.post.body,
-        categories: postEditor.data.post.categories,
-      };
+  });
+  const categoriesOptions = useMemo(() => {
+    return categories.map((category) => ({
+      label: category.name,
+      value: category._id,
+    }));
+  }, [categories]);
+  const [oldCover, setOldCover] = useState({
+    _id: "",
+    src: "",
+  });
+
+  // effects
+  useEffect(() => {
+    if (coverId && updateModeReady(postEditor)) {
+      const src = fetchOldCoverSrcById(coverId);
+      setOldCover({
+        _id: coverId,
+        src,
+      });
     }
   }, []);
 
+  // handlers
   function handleSubmit(e) {
     e.preventDefault();
-    if (postEditor && postEditor.mode === "create") {
-      postsAPI
-        .postPost(title, body, selectedCategories, coverId)
-        .then(({ post }) => {
-          setPosts((prev) => [...prev, post]);
-        })
-        .catch((e) => console.log(e));
-    } else if (
-      postEditor &&
-      postEditor.data &&
-      postEditor.data.post &&
-      postEditor.mode === "update"
-    ) {
-      if (
-        postEditor.data.post.title === title &&
-        postEditor.data.post.body === body &&
-        JSON.stringify(postEditor.data.post.categories) ===
-          JSON.stringify(selectedCategories) &&
-        coverId === oldCover._id
-      ) {
-        return false;
-      }
-
+    if (updateModeReady(postEditor) && fieldsChanged()) {
       postsAPI
         .updatePostById(
           postEditor.data.post._id,
@@ -121,6 +127,13 @@ const PostForm = ({
           }
         })
         .catch((e) => console.log(e));
+    } else if (postEditor && postEditor.mode === "create") {
+      postsAPI
+        .postPost(title, body, selectedCategories, coverId)
+        .then(({ post }) => {
+          setPosts((prev) => [...prev, post]);
+        })
+        .catch((e) => console.log(e));
     }
   }
 
@@ -130,7 +143,7 @@ const PostForm = ({
       data: {},
       state: false,
     }));
-    if (postEditor.mode === "update") {
+    if (postEditor.mode === "update" && fieldsChanged()) {
       messageApi.success("Your post has been updated successfully.");
     }
     if (postEditor.mode === "create") {
@@ -144,29 +157,10 @@ const PostForm = ({
     );
   }
 
-  const categoriesOptions = useMemo(() => {
-    return categories.map((category) => ({
-      label: category.name,
-      value: category._id,
-    }));
-  }, [categories]);
-
   return (
-    <div
-      style={{
-        padding: "50px",
-        marginTop: "25px",
-        boxShadow:
-          "0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%)",
-        borderRadius: "6px",
-        background: "rgb(255, 255, 255)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="post-form-container">
       <Typography.Title level={2} style={{ margin: "0 auto 48px auto" }}>
-        {postEditor && postEditor.mode === "create" && "Creating new post"}
-        {postEditor && postEditor.mode === "update" && "Updating post"}
+        {updateModeReady(postEditor) ? "Updating post" : "Creating new post"}
       </Typography.Title>
       <Form
         onSubmitCapture={handleSubmit}
@@ -192,15 +186,11 @@ const PostForm = ({
         >
           <Input placeholder="Please input post title" />
         </Item>
-        {coverId &&
-          postEditor &&
-          postEditor.mode === "update" &&
-          oldCover &&
-          oldCover.src && (
-            <Item label="Current cover">
-              <Image height={200} src={oldCover.src} />
-            </Item>
-          )}
+        {oldCover.src && (
+          <Item label="Current cover">
+            <Image height={200} src={oldCover.src} />
+          </Item>
+        )}
         <Item label="Cover">
           <CoverUpload
             mode={postEditor.mode}

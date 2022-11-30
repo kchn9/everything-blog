@@ -1,6 +1,6 @@
 import postsAPI from "./services/postsAPI";
 import coversAPI from "./services/coversAPI";
-import { truncate } from "./util/truncate";
+import truncate from "./util/truncate";
 import { Buffer } from "buffer";
 import {
   ExpandOutlined,
@@ -14,7 +14,7 @@ const { Meta } = AntCard;
 const Card = ({ setPostEditor, post, setPosts, messageApi }) => {
   const [src, setSrc] = useState("");
   function fetchCover() {
-    if (post) {
+    if (post && post.coverId) {
       coversAPI
         .getCoverById(post.coverId)
         .then(({ file }) => {
@@ -67,7 +67,6 @@ const Card = ({ setPostEditor, post, setPosts, messageApi }) => {
       hoverable
       cover={
         <Image
-          preview={false}
           style={{
             borderRadius: "0",
             objectFit: "cover",

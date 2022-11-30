@@ -2,30 +2,11 @@ import postsAPI from "./services/postsAPI";
 import categoriesAPI from "./services/categoriesAPI";
 import { useState, useEffect } from "react";
 import { Breadcrumb } from "./Breadcrumb";
-import { Card } from "./Card";
 import { PostForm } from "./PostForm";
-import { Layout, Row, Col, Spin, Empty, Typography } from "antd";
+import { Loader } from "./Loader";
+import { Layout, Empty } from "antd";
+import { PostsGrid } from "./PostsGrid";
 const { Content: AntContent } = Layout;
-
-const PostsGrid = ({ setPostEditor, posts, setPosts, messageApi }) => {
-  if (posts) {
-    return (
-      <Row gutter={[12, 16]}>
-        {posts.map((post) => (
-          <Col key={post._id} xxl={4} xl={6} lg={8} sm={12} xs={24}>
-            <Card
-              post={post}
-              setPostEditor={setPostEditor}
-              setPosts={setPosts}
-              messageApi={messageApi}
-            />
-          </Col>
-        ))}
-      </Row>
-    );
-  }
-  return null;
-};
 
 export const Content = ({
   categories,
@@ -34,7 +15,7 @@ export const Content = ({
   setPostEditor,
   messageApi,
 }) => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(null);
   const fetchPosts = async () => {
     if (activeCategory.name === "All") {
       return postsAPI.getAllPosts().then((res) => {
@@ -51,9 +32,9 @@ export const Content = ({
     fetchPosts();
   }, [activeCategory]);
 
-  return (
-    <AntContent style={{ padding: "24px 50px" }}>
-      {postEditor && postEditor.state ? (
+  if (postEditor.state) {
+    return (
+      <AntContent style={{ padding: "24px 50px" }}>
         <PostForm
           postEditor={postEditor}
           categories={categories}
@@ -61,32 +42,26 @@ export const Content = ({
           setPostEditor={setPostEditor}
           setPosts={setPosts}
         />
-      ) : posts ? (
-        posts.length != 0 ? (
-          <>
-            <Breadcrumb activeCategory={activeCategory} />
-            <PostsGrid
-              setPostEditor={setPostEditor}
-              posts={posts}
-              setPosts={setPosts}
-              messageApi={messageApi}
-            />
-          </>
-        ) : (
-          <Empty style={{ margin: "64px 0" }} description="No posts" />
-        )
+      </AntContent>
+    );
+  }
+
+  if (!posts) {
+    return <Loader />;
+  }
+
+  return (
+    <AntContent style={{ padding: "24px 50px" }}>
+      <Breadcrumb activeCategory={activeCategory} />
+      {posts.length === 0 ? (
+        <Empty style={{ margin: "64px 0" }} description="No posts" />
       ) : (
-        <>
-          <Spin
-            size="large"
-            style={{
-              margin: "64px 0 24px 0",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          />
-          <Typography style={{ textAlign: "center" }}>Loading...</Typography>
-        </>
+        <PostsGrid
+          setPostEditor={setPostEditor}
+          posts={posts}
+          setPosts={setPosts}
+          messageApi={messageApi}
+        />
       )}
     </AntContent>
   );
