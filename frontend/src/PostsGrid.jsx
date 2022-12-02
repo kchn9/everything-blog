@@ -1,18 +1,57 @@
-import { Row, Col } from "antd";
-import { Card } from "./Card";
 import { useAppStore } from "./hooks/useAppStore";
+import { useWindowSize } from "./hooks/useWindowSize";
+import { Card } from "./Card";
+import { List } from "antd";
+import { useState, useEffect } from "react";
+const { Item } = List;
 
 const PostsGrid = ({ messageApi }) => {
   const posts = useAppStore((state) => state.posts);
+
+  const [width, _] = useWindowSize();
+  const [pageSize, setPageSize] = useState(8);
+  useEffect(() => {
+    if (width < 576) {
+      setPageSize(2);
+    }
+    if (width >= 576) {
+      setPageSize(4);
+    }
+    if (width >= 992) {
+      setPageSize(6);
+    }
+    if (width >= 1600) {
+      setPageSize(8);
+    }
+  }, [width]);
+
   if (posts) {
     return (
-      <Row gutter={[12, 16]}>
-        {posts.map((post) => (
-          <Col key={post._id} xxl={4} xl={6} lg={8} sm={12} xs={24}>
-            <Card post={post} messageApi={messageApi} />
-          </Col>
-        ))}
-      </Row>
+      <>
+        <List
+          grid={{
+            gutter: [0, 24],
+            xs: 1,
+            sm: 2,
+            md: 2,
+            lg: 3,
+            xl: 3,
+            xxl: 4,
+          }}
+          dataSource={posts}
+          renderItem={(post) => (
+            <Item>
+              <Card post={post} messageApi={messageApi} />
+            </Item>
+          )}
+          pagination={{
+            defaultCurrent: 1,
+            hideOnSinglePage: true,
+            pageSize: pageSize,
+            responsive: true,
+          }}
+        />
+      </>
     );
   }
   return null;
