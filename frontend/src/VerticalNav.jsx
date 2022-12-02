@@ -3,6 +3,7 @@ import { usePostFormStore } from "./hooks/usePostFormStore";
 import { MenuOutlined } from "@ant-design/icons";
 import { NewPostButton } from "./NewPostButton";
 import { Dropdown, Divider, Space } from "antd";
+import { SearchBox } from "./SearchBox";
 
 const VerticalDropdown = ({ menu }) => {
   return (
@@ -24,10 +25,13 @@ const VerticalDropdown = ({ menu }) => {
       />
       <Space
         style={{
-          padding: "13px 50px",
+          width: "100%",
+          padding: "13px 0",
         }}
+        align="center"
+        direction="vertical"
       >
-        Search field
+        <SearchBox />
       </Space>
     </div>
   );

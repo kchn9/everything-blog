@@ -15,7 +15,9 @@ export const Content = ({ messageApi }) => {
   const showPostForm = usePostFormStore((state) => state.showPostForm);
 
   useEffect(() => {
-    fetchPosts();
+    if (activeCategory._id !== "-1") {
+      fetchPosts();
+    }
   }, [activeCategory]);
 
   if (showPostForm) {

@@ -1,7 +1,7 @@
 import { Typography, Form, Input, Select, Empty, Image, Button } from "antd";
 import { CoverUpload } from "./CoverUpload";
 import { CategoryTag } from "./CategoryTag";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useAppStore } from "./hooks/useAppStore";
 import { usePostFormStore } from "./hooks/usePostFormStore";
 const { Item } = Form;

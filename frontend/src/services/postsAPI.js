@@ -6,6 +6,11 @@ const postsAPI = {
   getAllPosts() {
     return axios.get(postsEndpoint).then((res) => res.data);
   },
+  searchPosts(query) {
+    return axios
+      .get(`${postsEndpoint}/search?contains=${query}`)
+      .then((res) => res.data);
+  },
   postPost(title, body, categories, coverId) {
     return axios
       .post(postsEndpoint, {

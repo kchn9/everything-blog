@@ -19,23 +19,7 @@ export const useAppStore = create((set, get) => ({
   setActiveCategory: ({ _id, name }) =>
     set(() => ({
       activeCategory: { _id, name },
-    })), // zustand allows to omit general state destructing but only on first level of depth, nested objects have to be destructed explicitly
-  postEditor: {
-    state: false,
-    mode: "add",
-    data: {
-      post: {},
-    },
-  },
-  setPostEditor: ({ state, mode, data }) => {
-    set(() => ({
-      postEditor: {
-        state,
-        mode,
-        data,
-      },
-    }));
-  },
+    })),
   posts: [],
   fetchPosts: async () => {
     const activeCategory = get().activeCategory;
@@ -65,5 +49,23 @@ export const useAppStore = create((set, get) => ({
     set((state) => ({
       posts: state.posts.filter((p) => p._id !== post._id),
     }));
+  },
+  searchQuery: "",
+  setSearchQuery: (query) => set(() => ({ searchQuery: query })),
+  handlePostsSearch: async () => {
+    if (get().searchQuery.length > 0) {
+      try {
+        const posts = await postsAPI.searchPosts(get().searchQuery);
+        set(() => ({
+          activeCategory: {
+            _id: "-1",
+            name: `Result of search query: ${get().searchQuery}`,
+          },
+          posts: posts,
+        }));
+      } catch (e) {
+        console.log("Unable to search", e);
+      }
+    }
   },
 }));

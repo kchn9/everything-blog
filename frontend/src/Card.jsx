@@ -67,16 +67,18 @@ const Card = ({ post, messageApi }) => {
       bordered={false}
       hoverable
       cover={
-        <Image
-          style={{
-            borderRadius: "0",
-            objectFit: "cover",
-            maxHeight: "50vh",
-            objectPosition: "50% 50%",
-            backgroundColor: "grey",
-          }}
-          src={src}
-        />
+        src && (
+          <Image
+            style={{
+              borderRadius: "0",
+              objectFit: "cover",
+              maxHeight: "50vh",
+              objectPosition: "50% 50%",
+              backgroundColor: "grey",
+            }}
+            src={src}
+          />
+        )
       }
       actions={actions}
       bodyStyle={{

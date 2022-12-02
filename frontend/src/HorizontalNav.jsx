@@ -31,7 +31,7 @@ const HorizontalNav = ({ navItems, handleActiveCategoryChange }) => {
         />
       )}
 
-      <div style={{ flex: "1 48px" }}></div>
+      <div style={{ flex: "1" }}></div>
       <NewPostButton />
     </div>
   );
