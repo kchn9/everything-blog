@@ -2,9 +2,12 @@ import coverAPI from "./services/coversAPI";
 import { Upload, Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import { usePostFormStore } from "./hooks/usePostFormStore";
 
-const CoverUpload = ({ mode, oldCoverId, setCoverId }) => {
+const CoverUpload = ({ updateCurrentCover }) => {
   const [filelist, setFilelist] = useState([]);
+  const oldCoverId = usePostFormStore((state) => state.oldPost.coverId);
+  const isNewPost = usePostFormStore((state) => state.isNewPost);
 
   return (
     <Upload
@@ -36,8 +39,9 @@ const CoverUpload = ({ mode, oldCoverId, setCoverId }) => {
         coverAPI
           .deleteCoverById(coverToDelete._id)
           .then(() => {
-            if (mode === "update") {
-              setCoverId(oldCoverId);
+            if (!isNewPost) {
+              // works well only if filelist maxCount = 1
+              updateCurrentCover(oldCoverId);
             }
             return true;
           })
@@ -50,7 +54,7 @@ const CoverUpload = ({ mode, oldCoverId, setCoverId }) => {
         coverAPI
           .postCover(file)
           .then((response) => {
-            setCoverId(response._id);
+            updateCurrentCover(response._id);
             onSuccess(response);
           })
           .catch((e) => {
@@ -59,7 +63,7 @@ const CoverUpload = ({ mode, oldCoverId, setCoverId }) => {
       }}
     >
       <Button icon={<UploadOutlined />}>
-        {mode === "update" ? "Change cover" : "Upload"}
+        {isNewPost ? "Upload" : "Change cover"}
       </Button>
     </Upload>
   );

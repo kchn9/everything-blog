@@ -9,12 +9,17 @@ import {
 import { Card as AntCard, Typography, Image } from "antd";
 import { useState, useEffect } from "react";
 import { useAppStore } from "./hooks/useAppStore";
+import { usePostFormStore } from "./hooks/usePostFormStore";
+
 const { Meta } = AntCard;
 
 const Card = ({ post, messageApi }) => {
   const [src, setSrc] = useState("");
   const deletePost = useAppStore((state) => state.deletePost);
-  const setPostEditor = useAppStore((state) => state.setPostEditor);
+  const setShowPostForm = usePostFormStore((state) => state.setShowPostForm);
+  const setIsNewPost = usePostFormStore((state) => state.setIsNewPost);
+  const setOldPost = usePostFormStore((state) => state.setOldPost);
+
   function fetchCover() {
     if (post && post.coverId) {
       coversAPI
@@ -30,14 +35,11 @@ const Card = ({ post, messageApi }) => {
   }, [post]);
 
   function handlePostEdit() {
-    setPostEditor({
-      state: true,
-      mode: "update",
-      data: {
-        post,
-      },
-    });
+    setShowPostForm(true);
+    setIsNewPost(false);
+    setOldPost({ ...post, coverSrc: src });
   }
+
   function handlePostDelete() {
     postsAPI
       .deletePostById(post._id)

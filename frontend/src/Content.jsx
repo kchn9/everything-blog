@@ -1,23 +1,24 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Breadcrumb } from "./Breadcrumb";
 import { PostForm } from "./PostForm";
 import { Loader } from "./Loader";
 import { Layout, Empty } from "antd";
 import { PostsGrid } from "./PostsGrid";
 import { useAppStore } from "./hooks/useAppStore";
+import { usePostFormStore } from "./hooks/usePostFormStore";
 const { Content: AntContent } = Layout;
 
 export const Content = ({ messageApi }) => {
   const posts = useAppStore((state) => state.posts);
-  const isUpdateMode = useAppStore((state) => state.postEditor.state);
   const activeCategory = useAppStore((state) => state.activeCategory);
   const fetchPosts = useAppStore((state) => state.fetchPosts);
+  const showPostForm = usePostFormStore((state) => state.showPostForm);
 
   useEffect(() => {
     fetchPosts();
   }, [activeCategory]);
 
-  if (isUpdateMode) {
+  if (showPostForm) {
     return (
       <AntContent style={{ padding: "24px 50px" }}>
         <PostForm messageApi={messageApi} />

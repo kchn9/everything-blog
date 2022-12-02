@@ -1,9 +1,10 @@
 import { useAppStore } from "./hooks/useAppStore";
-import { PostEditorButton } from "./PostEditorButton";
+import { usePostFormStore } from "./hooks/usePostFormStore";
+import { NewPostButton } from "./NewPostButton";
 import { Menu } from "antd";
 
 const HorizontalNav = ({ navItems, handleActiveCategoryChange }) => {
-  const shouldRenderMenu = !useAppStore((state) => state.postEditor.state);
+  const shouldRenderMenu = !usePostFormStore((state) => state.showPostForm);
   const activeCategory = useAppStore((state) => state.activeCategory);
   return (
     <div
@@ -31,7 +32,7 @@ const HorizontalNav = ({ navItems, handleActiveCategoryChange }) => {
       )}
 
       <div style={{ flex: "1 48px" }}></div>
-      <PostEditorButton />
+      <NewPostButton />
     </div>
   );
 };

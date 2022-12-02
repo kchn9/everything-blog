@@ -1,6 +1,7 @@
 import { useAppStore } from "./hooks/useAppStore";
+import { usePostFormStore } from "./hooks/usePostFormStore";
 import { MenuOutlined } from "@ant-design/icons";
-import { PostEditorButton } from "./PostEditorButton";
+import { NewPostButton } from "./NewPostButton";
 import { Dropdown, Divider, Space } from "antd";
 
 const VerticalDropdown = ({ menu }) => {
@@ -33,7 +34,7 @@ const VerticalDropdown = ({ menu }) => {
 };
 
 const VerticalNav = ({ navItems, handleActiveCategoryChange }) => {
-  const shouldDisplayMenuIcon = useAppStore((state) => state.postEditor.state);
+  const shouldDisplayMenuIcon = usePostFormStore((state) => state.showPostForm);
   const activeCategory = useAppStore((state) => state.activeCategory);
   return (
     <div
@@ -43,7 +44,7 @@ const VerticalNav = ({ navItems, handleActiveCategoryChange }) => {
         justifyContent: "space-between",
       }}
     >
-      <PostEditorButton />
+      <NewPostButton />
       <div className="logo" style={{ marginRight: 46 }}>
         EverythingBlog
       </div>

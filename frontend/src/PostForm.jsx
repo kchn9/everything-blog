@@ -1,20 +1,12 @@
-import postsAPI from "./services/postsAPI";
-import coversAPI from "./services/coversAPI";
 import { Typography, Form, Input, Select, Empty, Image, Button } from "antd";
 import { CoverUpload } from "./CoverUpload";
 import { CategoryTag } from "./CategoryTag";
-import { useState, useMemo } from "react";
-import { useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAppStore } from "./hooks/useAppStore";
+import { usePostFormStore } from "./hooks/usePostFormStore";
 const { Item } = Form;
 
 const PostForm = ({ messageApi }) => {
-  // form values
-  const [form] = Form.useForm();
-  const title = Form.useWatch("title", form);
-  const body = Form.useWatch("body", form);
-  const selectedCategories = Form.useWatch("categories", form);
-
   // state
   const categories = useAppStore((state) => state.categories);
   const categoriesOptions = useMemo(() => {
@@ -23,112 +15,41 @@ const PostForm = ({ messageApi }) => {
       value: category._id,
     }));
   }, [categories]);
-  const postEditor = useAppStore((state) => state.postEditor);
-  const oldPost = useAppStore((state) => state.postEditor.data.post);
-  const [oldCover, setOldCover] = useState({
-    _id: "",
-    src: "",
-  });
+  const isNewPost = usePostFormStore((state) => state.isNewPost);
+  const oldPost = usePostFormStore((state) => state.oldPost);
 
+  // form values
+  const [form] = Form.useForm();
   const [currentCoverId, setCurrentCoverId] = useState(() => {
-    return postEditor.mode === "update" ? oldPost.coverId : undefined;
+    return isNewPost ? "" : oldPost.coverId;
   });
-
-  // effects
-  useEffect(() => {
-    if (currentCoverId && postEditor.mode === "update") {
-      coversAPI.getCoverSrcById(currentCoverId).then((src) => {
-        setOldCover({
-          _id: currentCoverId,
-          src,
-        });
-      });
-    }
-  }, []);
-
-  // actions
-  const updatePost = useAppStore((state) => state.updatePost);
-  const addPost = useAppStore((state) => state.addPost);
-  const setPostEditor = useAppStore((state) => state.setPostEditor);
 
   // handlers
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (postEditor.mode === "update" && fieldsChanged()) {
-      postsAPI
-        .updatePostById(
-          postEditor.data.post._id,
-          title,
-          body,
-          selectedCategories,
-          currentCoverId
-        )
-        .then((post) => {
-          if (oldCover._id !== currentCoverId) {
-            coversAPI
-              .deleteCoverById(oldCover._id)
-              .then(() => updatePost(post))
-              .catch((e) => console.log("Unable to delete old cover", e));
-          } else {
-            updatePost(post);
-          }
-        })
-        .catch((e) => console.log(e));
-    } else if (postEditor && postEditor.mode === "create") {
-      postsAPI
-        .postPost(title, body, selectedCategories, currentCoverId)
-        .then(({ post }) => {
-          addPost(post);
-        })
-        .catch((e) => console.log(e));
-    }
-  }
-
-  function handleSuccessfullFinish() {
-    setPostEditor({
-      state: false,
-      mode: "create",
-      data: {},
-    });
-    if (postEditor.mode === "update" && fieldsChanged()) {
-      messageApi.success("Your post has been updated successfully.");
-    }
-    if (postEditor.mode === "create") {
-      messageApi.success("Your post has been added successfully.");
-    }
-  }
-
-  function handleFailedFinish() {
-    messageApi.error(
-      "Ooops.. something went wrong, please check error fields and try again."
-    );
-  }
-
-  // helper
-  function fieldsChanged() {
-    return (
-      oldPost.title !== title ||
-      oldPost.body !== body ||
-      JSON.stringify(oldPost.categories) !==
-        JSON.stringify(selectedCategories) ||
-      currentCoverId !== oldCover._id
-    );
-  }
+  const handleSubmit = usePostFormStore((state) => state.handleSubmit);
+  const handleSuccessfullFinish = usePostFormStore(
+    (state) => state.handleSuccessfullFinish
+  );
+  const handleFailedFinish = usePostFormStore(
+    (state) => state.handleFailedFinish
+  );
 
   return (
     <div className="post-form-container">
       <Typography.Title level={2} style={{ margin: "0 auto 48px auto" }}>
-        {postEditor.mode === "update" ? "Updating post" : "Creating new post"}
+        {isNewPost ? "Creating new post" : "Updating post"}
       </Typography.Title>
       <Form
-        onSubmitCapture={handleSubmit}
-        onFinish={handleSuccessfullFinish}
-        onFinishFailed={handleFailedFinish}
-        initialValues={{
-          title: oldPost?.title,
-          body: oldPost?.body,
-          categories: oldPost?.categories,
+        onSubmitCapture={(e) => {
+          e.preventDefault();
+          handleSubmit(form, currentCoverId);
         }}
+        onFinish={() =>
+          handleSuccessfullFinish(form, currentCoverId, messageApi)
+        }
+        onFinishFailed={() => {
+          handleFailedFinish(messageApi);
+        }}
+        initialValues={oldPost}
         form={form}
         name="post"
         labelCol={{ span: 6 }}
@@ -141,24 +62,20 @@ const PostForm = ({ messageApi }) => {
           name="title"
           rules={[
             {
-              required: postEditor.mode === "create",
-              message: "Please input post title",
+              required: isNewPost,
+              message: "Post title is required",
             },
           ]}
         >
           <Input placeholder="Please input post title" />
         </Item>
-        {oldCover.src && (
+        {oldPost && oldPost.coverSrc && (
           <Item label="Current cover">
-            <Image height={200} src={oldCover.src} />
+            <Image height={200} src={oldPost.coverSrc} />
           </Item>
         )}
         <Item label="Cover">
-          <CoverUpload
-            mode={postEditor.mode}
-            oldCoverId={oldCover._id}
-            setCoverId={setCurrentCoverId}
-          />
+          <CoverUpload updateCurrentCover={setCurrentCoverId} />
           <Typography.Text type="secondary">
             Maximum file size is 2MB. Accepted formats are .jpg/.jpeg and .png
           </Typography.Text>
@@ -184,8 +101,8 @@ const PostForm = ({ messageApi }) => {
           name="body"
           rules={[
             {
-              required: postEditor.mode === "create",
-              message: "Please input post content",
+              required: isNewPost,
+              message: "Post content is required",
             },
           ]}
         >
