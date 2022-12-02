@@ -20,7 +20,7 @@ const SearchBox = () => {
           title.includes(searchQuery.toLowerCase())
         );
       });
-      const mapped = filtered.map((p) => ({ value: p.title }));
+      const mapped = filtered.map((p) => ({ key: p._id, value: p.title }));
       setOptions(mapped);
     }
   }, [searchQuery]);
