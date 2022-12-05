@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "build:ui": "rm -rf dist && cd frontend && npm run build && cp -r dist ../"
+    "build:ui": "rm -rf dist && cd frontend && npm run build && cp -r dist ../",
+    "deploy": "fly deploy",
+    "deploy:full": "npm rn build:ui && npm run deploy"
   },
   "author": "kchn9",
   "license": "MIT",
