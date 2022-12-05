@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const postsEndpoint = "http://localhost:3000/api/v1/posts";
+const postsEndpoint = "/api/v1/posts";
 
 const postsAPI = {
   getAllPosts() {

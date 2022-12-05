@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Buffer } from "buffer";
 
-const coversEndpoint = "http://localhost:3000/api/v1/posts/covers";
+const coversEndpoint = "/api/v1/posts/covers";
 
 const coversAPI = {
   getCoverSrcById(coverId) {

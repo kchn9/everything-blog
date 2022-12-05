@@ -30,6 +30,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(requestLogger);
 
+app.use(express.static("dist"));
+
 app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/posts", postsRouter);
 
