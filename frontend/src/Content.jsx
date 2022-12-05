@@ -6,6 +6,7 @@ import { Layout, Empty } from "antd";
 import { PostsGrid } from "./PostsGrid";
 import { useAppStore } from "./hooks/useAppStore";
 import { usePostFormStore } from "./hooks/usePostFormStore";
+import { PostContent } from "./PostContent";
 const { Content: AntContent } = Layout;
 
 export const Content = ({ messageApi }) => {
@@ -13,6 +14,7 @@ export const Content = ({ messageApi }) => {
   const activeCategory = useAppStore((state) => state.activeCategory);
   const fetchPosts = useAppStore((state) => state.fetchPosts);
   const showPostForm = usePostFormStore((state) => state.showPostForm);
+  const showSelectedPost = useAppStore((state) => state.showSelectedPost);
 
   useEffect(() => {
     if (activeCategory._id !== "-1") {
@@ -24,6 +26,14 @@ export const Content = ({ messageApi }) => {
     return (
       <AntContent style={{ padding: "24px 50px" }}>
         <PostForm messageApi={messageApi} />
+      </AntContent>
+    );
+  }
+
+  if (showSelectedPost) {
+    return (
+      <AntContent style={{ padding: "24px 50px" }}>
+        <PostContent />
       </AntContent>
     );
   }
