@@ -1,10 +1,7 @@
 import create from "zustand";
-import { useAppStore } from "./useAppStore";
 import postsAPI from "../services/postsAPI";
 import coversAPI from "../services/coversAPI";
-
-const addPost = useAppStore.getState().addPost;
-const updatePost = useAppStore.getState().updatePost;
+import { useAppStore } from "./useAppStore";
 
 export const usePostFormStore = create((set, get) => ({
   showPostForm: false,
@@ -25,9 +22,9 @@ export const usePostFormStore = create((set, get) => ({
     coverId: "",
     coverSrc: "",
   },
-  setOldPost: ({ _id, title, body, categories, coverId, coverSrc }) => {
+  setOldPost: (post) => {
     set(() => ({
-      oldPost: { _id, title, body, categories, coverId, coverSrc },
+      oldPost: post,
     }));
   },
   handleSubmit: (form, currentCoverId) => {
@@ -35,6 +32,8 @@ export const usePostFormStore = create((set, get) => ({
     const body = form.getFieldValue("body") || "";
     const categories = form.getFieldValue("categories") || [];
     const oldPost = get().oldPost;
+    const updatePost = useAppStore.getState().updatePost;
+    const addPost = useAppStore.getState().addPost;
 
     if (get().isNewPost && title && body) {
       postsAPI

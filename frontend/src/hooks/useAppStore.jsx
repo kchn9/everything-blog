@@ -1,6 +1,7 @@
 import create from "zustand";
-import categoriesAPI from "../services/categoriesAPI";
 import postsAPI from "../services/postsAPI";
+import categoriesAPI from "../services/categoriesAPI";
+import { usePostFormStore } from "./usePostFormStore";
 
 export const useAppStore = create((set, get) => ({
   categories: [{}],
@@ -35,6 +36,16 @@ export const useAppStore = create((set, get) => ({
       console.log("Unable to fetch posts", e);
     }
   },
+  selectedPost: {
+    _id: "",
+    title: "",
+    body: "",
+    categories: [],
+    createdAt: "",
+    upadtedAt: "",
+  },
+  showSelectedPost: false,
+  setShowSelectedPost: (boolean) => set(() => ({ showSelectedPost: boolean })),
   addPost: (post) => {
     set((state) => ({
       posts: [...state.posts, post],
@@ -49,6 +60,29 @@ export const useAppStore = create((set, get) => ({
     set((state) => ({
       posts: state.posts.filter((p) => p._id !== post._id),
     }));
+  },
+  handleExpandPostButton: (post) =>
+    set(() => ({
+      selectedPost: post,
+      showSelectedPost: true,
+    })),
+  handleEditPostButton: (post) => {
+    const setShowPostForm = usePostFormStore.getState().setShowPostForm;
+    const setIsNewPost = usePostFormStore.getState().setIsNewPost;
+    const setOldPost = usePostFormStore.getState().setOldPost;
+    setShowPostForm(true);
+    setIsNewPost(false);
+    setOldPost(post);
+  },
+  handleDeletePostButton: async (post, messageApi) => {
+    try {
+      await postsAPI.deletePostById(post._id);
+      get().deletePost(post);
+      messageApi.success("Your post has been deleted successfully.", 1);
+    } catch (e) {
+      console.log("Unable to delete post", e);
+      messageApi.error("Oops... something went wrong, try again later.", 1);
+    }
   },
   searchQuery: "",
   setSearchQuery: (query) => set(() => ({ searchQuery: query })),

@@ -1,25 +1,18 @@
-import postsAPI from "./services/postsAPI";
 import coversAPI from "./services/coversAPI";
-import truncate from "./util/truncate";
 import {
   ExpandOutlined,
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { Card as AntCard, Typography, Image } from "antd";
 import { useState, useEffect } from "react";
 import { useAppStore } from "./hooks/useAppStore";
-import { usePostFormStore } from "./hooks/usePostFormStore";
 
+import { Card as AntCard, Typography, Image } from "antd";
+const { Paragraph } = Typography;
 const { Meta } = AntCard;
 
 const Card = ({ post, messageApi }) => {
   const [src, setSrc] = useState("");
-  const deletePost = useAppStore((state) => state.deletePost);
-  const setShowPostForm = usePostFormStore((state) => state.setShowPostForm);
-  const setIsNewPost = usePostFormStore((state) => state.setIsNewPost);
-  const setOldPost = usePostFormStore((state) => state.setOldPost);
-
   function fetchCover() {
     if (post && post.coverId) {
       coversAPI
@@ -34,33 +27,26 @@ const Card = ({ post, messageApi }) => {
     fetchCover();
   }, [post]);
 
-  function handlePostEdit() {
-    setShowPostForm(true);
-    setIsNewPost(false);
-    setOldPost({ ...post, coverSrc: src });
-  }
+  const handleExpandPostButton = useAppStore(
+    (state) => state.handleExpandPostButton
+  );
+  const handleDeletePostButton = useAppStore(
+    (state) => state.handleDeletePostButton
+  );
+  const handleEditPostButton = useAppStore(
+    (state) => state.handleEditPostButton
+  );
 
-  function handlePostDelete() {
-    postsAPI
-      .deletePostById(post._id)
-      .then(() => {
-        messageApi.success("Your post has been deleted successfully.", 1);
-        deletePost(post);
-      })
-      .catch((e) => {
-        console.log(e);
-        messageApi.error("Oops... something went wrong, try again later.", 1);
-      });
-  }
   const actions = [
-    <ExpandOutlined key="show" />,
-    <EditOutlined key="edit" onClick={() => handlePostEdit()} />,
+    <ExpandOutlined key="show" onClick={() => handleExpandPostButton(post)} />,
+    <EditOutlined key="edit" onClick={() => handleEditPostButton(post)} />,
     <DeleteOutlined
       key="edit"
       className="delete-icon"
-      onClick={() => handlePostDelete()}
+      onClick={() => handleDeletePostButton(post, messageApi)}
     />,
   ];
+
   return (
     <AntCard
       title={post.title}
@@ -88,13 +74,16 @@ const Card = ({ post, messageApi }) => {
         flexDirection: "column",
       }}
     >
-      <Meta style={{ flex: 1 }} description={truncate(post.body, 72)} />
-      <Typography.Paragraph
+      <Meta
+        style={{ flex: 1 }}
+        description={<Paragraph ellipsis={{ rows: 3 }}>{post.body}</Paragraph>}
+      />
+      <Paragraph
         style={{ fontSize: 12, textAlign: "right", margin: "16px 8px 0px 0px" }}
         type="secondary"
       >
         Created on {new Date(post.createdAt).toLocaleDateString()}
-      </Typography.Paragraph>
+      </Paragraph>
     </AntCard>
   );
 };
